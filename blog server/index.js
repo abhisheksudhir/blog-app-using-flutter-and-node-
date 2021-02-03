@@ -16,6 +16,12 @@ connection.once("open", () => {
   console.log("MongoDb connected");
 });
 
+app.use(express.json());    //to parse json
+
+const userRoute = require("./routes/user");
+
+app.use("/user", userRoute);
+
 app.route("/").get((req, res) => res.json("your first rest api"));
 
 app.listen(port, () => console.log(`listening at port ${port}`));
