@@ -26,6 +26,46 @@ const router = express.Router();
 //   });
 // });
 
+router.get("/:username", async (req, res, next) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+
+    if (!user) {
+      throw new Error("No such user found");
+    }
+
+    const { password, ...profile } = user.toJSON();
+
+    res.status(200).json({ data: profile, username: req.params.username });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.post("/login", async (req, res, next) => {
+  try {
+    const user = await User.findOne({ username: req.body.username });
+
+    if (user === null) {
+      throw new Error("user does not exist");
+    }
+
+    if(user.password === req.body.password) {
+      res.status(200).json({ msg: "logged in" });
+    } else {
+      throw new Error("Invalid password");
+    }
+  } catch (err) {
+    let num = 500;
+    if (err.message != "user does not exist") {
+      num = 403;
+    }
+    res.status(500).json({ msg: err.message });
+    next(err);
+  }
+});
+
 router.post("/register", async (req, res, next) => {
   try {
     const userexist = await User.findOne({
