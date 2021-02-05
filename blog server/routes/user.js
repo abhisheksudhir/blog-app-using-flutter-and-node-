@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/user.model");
-
+const jwt = require("jsonwebtoken");
+const middleware = require("../middlewares/auth");
 const router = express.Router();
 
 // router.post("/register", (req, res) => {
@@ -26,7 +27,7 @@ const router = express.Router();
 //   });
 // });
 
-router.get("/:username", async (req, res, next) => {
+router.get("/:username", middleware.checkToken, async (req, res, next) => {
   try {
     const user = await User.findOne({ username: req.params.username });
 
@@ -51,8 +52,12 @@ router.post("/login", async (req, res, next) => {
       throw new Error("user does not exist");
     }
 
-    if(user.password === req.body.password) {
-      res.status(200).json({ msg: "logged in" });
+    const { id, username } = user;
+    const valid = await user.comparePassword(req.body.password); //comparing if passwords match. returns true if they match
+
+    if (valid) {
+      const token = jwt.sign({ id, username }, process.env.SECRET);
+      res.status(200).json({ token: token, msg: "success" });
     } else {
       throw new Error("Invalid password");
     }
@@ -86,11 +91,14 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-router.patch("/update/:username", async (req, res, next) => {
+router.patch("/update/:username",middleware.checkToken, async (req, res, next) => {
   try {
     const userexist = await User.findOne({ username: req.params.username });
     if (userexist === null) {
       throw new Error("user does not exist");
+    }
+    if (userexist._id.toString()!== req.user.id) {
+      throw new Error("Not authorised to update username");
     }
     const user = await User.findOneAndUpdate(
       { username: req.params.username },
@@ -109,11 +117,14 @@ router.patch("/update/:username", async (req, res, next) => {
   }
 });
 
-router.delete("/delete/:username", async (req, res, next) => {
+router.delete("/delete/:username",middleware.checkToken, async (req, res, next) => {
   try {
     const userexist = await User.findOne({ username: req.params.username });
     if (userexist === null) {
       throw new Error("user does not exist");
+    }
+    if (userexist._id.toString()!== req.user.id) {
+      throw new Error("Not authorised to delete user");
     }
     const user = await User.findOneAndDelete({ username: req.params.username });
     const msg = {
@@ -128,5 +139,9 @@ router.delete("/delete/:username", async (req, res, next) => {
     next(err);
   }
 });
+
+// router.use(function (err, req, res, next) {
+//   res.status(500).json(err.message);
+// });
 
 module.exports = router;
