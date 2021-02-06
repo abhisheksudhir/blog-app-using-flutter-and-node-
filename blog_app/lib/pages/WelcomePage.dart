@@ -5,7 +5,54 @@ class WelcomePage extends StatefulWidget {
   _WelcomePageState createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> {
+class _WelcomePageState extends State<WelcomePage>
+    with TickerProviderStateMixin {
+  AnimationController _controller1;
+  Animation<Offset> animation1;
+  AnimationController _controller2;
+  Animation<Offset> animation2;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    //animation 1
+    _controller1 = AnimationController(
+      duration: Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    animation1 = Tween<Offset>(
+      begin: Offset(0.0, 8.0), //(x1,y1)
+      end: Offset(0.0, 0.0), //(x2,y2)
+    ).animate(
+      CurvedAnimation(parent: _controller1, curve: Curves.easeOut),
+    );
+
+    //animation 2
+    _controller2 = AnimationController(
+      duration: Duration(milliseconds: 2500),
+      vsync: this,
+    );
+    animation2 = Tween<Offset>(
+      begin: Offset(0.0, 8.0), //(x1,y1)
+      end: Offset(0.0, 0.0), //(x2,y2)
+    ).animate(
+      CurvedAnimation(parent: _controller2, curve: Curves.elasticInOut),
+    );
+
+    _controller1.forward();
+    _controller2.forward();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _controller1.dispose();
+    _controller2.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,24 +73,30 @@ class _WelcomePageState extends State<WelcomePage> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: Column(
               children: [
-                Text(
-                  "Blog App",
-                  style: TextStyle(
-                    fontSize: 38,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 2,
+                SlideTransition(
+                  position: animation1,
+                  child: Text(
+                    "Blog App",
+                    style: TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2,
+                    ),
                   ),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 6,
                 ),
-                Text(
-                  "Great stories for great people",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 38,
-                    letterSpacing: 2,
+                SlideTransition(
+                  position: animation2,
+                  child: Text(
+                    "Great stories for great people",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 38,
+                      letterSpacing: 2,
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -61,28 +114,31 @@ class _WelcomePageState extends State<WelcomePage> {
                 SizedBox(
                   height: 20,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already have an account?",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 17,
+                SlideTransition(
+                  position: animation2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Already have an account?",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 17,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      "Sign In",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
+                      SizedBox(
+                        width: 10,
                       ),
-                    ),
-                  ],
+                      Text(
+                        "Sign In",
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -93,30 +149,33 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Widget boxContainer(String path, String text) {
-    return Container(
-      height: 60,
-      width: MediaQuery.of(context).size.width * (0.8),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20.0,
-            vertical: 10.0,
-          ),
-          child: Row(
-            children: [
-              Image.asset(
-                path,
-                height: 25,
-                width: 25,
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              Text(
-                text,
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ],
+    return SlideTransition(
+      position: animation2,
+      child: Container(
+        height: 60,
+        width: MediaQuery.of(context).size.width * (0.8),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 10.0,
+            ),
+            child: Row(
+              children: [
+                Image.asset(
+                  path,
+                  height: 25,
+                  width: 25,
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                Text(
+                  text,
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+              ],
+            ),
           ),
         ),
       ),
