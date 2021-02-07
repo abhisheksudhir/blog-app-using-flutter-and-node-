@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:blog_app/NetworkHandler.dart';
+
 class SignUpPage extends StatefulWidget {
   static const routeName = '/sign-up';
 
@@ -10,6 +12,10 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   bool vis = true;
   final _globalkey = GlobalKey<FormState>();
+  NetworkHandler networkHandler = NetworkHandler();
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
   // final _usernameFocusNode = FocusNode();
   // final _emailFocusNode = FocusNode();
   // final _passwordFocusNode = FocusNode();
@@ -74,7 +80,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       onTap: () {
                         if (_globalkey.currentState.validate()) {
                           // we send data to rest api server
-                          print("Validated");
+                          Map<String, String> data = {
+                            "username": _usernameController.text,
+                            "email": _emailController.text,
+                            "password": _passwordController.text,
+                          };
+                          print(data);
+                          networkHandler.post("/user/register",data);
                         }
                       },
                       child: Container(
@@ -113,6 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
         children: [
           Text("Username"),
           TextFormField(
+            controller: _usernameController,
             // focusNode: _usernameFocusNode,
             textInputAction: TextInputAction.next,
             // onFieldSubmitted: (_) {
@@ -143,6 +156,7 @@ class _SignUpPageState extends State<SignUpPage> {
         children: [
           Text("Email"),
           TextFormField(
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             // focusNode: _emailFocusNode,
             textInputAction: TextInputAction.next,
@@ -175,6 +189,7 @@ class _SignUpPageState extends State<SignUpPage> {
         children: [
           Text("Password"),
           TextFormField(
+            controller: _passwordController,
             // focusNode: _passwordFocusNode,
             validator: (value) {
               if (value.isEmpty) return "Password can't be empty";
