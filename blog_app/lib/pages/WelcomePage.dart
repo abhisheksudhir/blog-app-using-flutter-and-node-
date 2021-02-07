@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:blog_app/pages/SignUpPage.dart';
+
 class WelcomePage extends StatefulWidget {
   @override
   _WelcomePageState createState() => _WelcomePageState();
@@ -56,21 +58,22 @@ class _WelcomePageState extends State<WelcomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white, Colors.green[200]],
-            begin: const FractionalOffset(0.0, 1.0),
-            end: const FractionalOffset(0.0, 1.0),
-            stops: [0.0, 1.0],
-            tileMode: TileMode.repeated,
+      body: SafeArea(
+        child: Container(
+          // alignment: Alignment.center,
+          height: double.infinity,
+          // width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.white, Colors.green[200]],
+              begin: const FractionalOffset(0.0, 1.0),
+              end: const FractionalOffset(0.0, 1.0),
+              stops: [0.0, 1.0],
+              tileMode: TileMode.repeated,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
             child: Column(
               children: [
                 SlideTransition(
@@ -102,15 +105,17 @@ class _WelcomePageState extends State<WelcomePage>
                 SizedBox(
                   height: 20,
                 ),
-                boxContainer("assets/google.png", "Sign Up with Google"),
+                boxContainer("assets/google.png", "Sign Up with Google", null),
                 SizedBox(
                   height: 20,
                 ),
-                boxContainer("assets/facebook1.png", "Sign Up with Facebook"),
+                boxContainer(
+                    "assets/facebook1.png", "Sign Up with Facebook", null),
                 SizedBox(
                   height: 20,
                 ),
-                boxContainer("assets/email2.png", "Sign Up with Email"),
+                boxContainer(
+                    "assets/email2.png", "Sign Up with Email", onEmailClick),
                 SizedBox(
                   height: 20,
                 ),
@@ -148,33 +153,40 @@ class _WelcomePageState extends State<WelcomePage>
     );
   }
 
-  Widget boxContainer(String path, String text) {
+  onEmailClick() {
+    Navigator.of(context).pushNamed(SignUpPage.routeName);
+  }
+
+  Widget boxContainer(String path, String text, onClick) {
     return SlideTransition(
       position: animation2,
-      child: Container(
-        height: 60,
-        width: MediaQuery.of(context).size.width * (0.8),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 10.0,
-            ),
-            child: Row(
-              children: [
-                Image.asset(
-                  path,
-                  height: 25,
-                  width: 25,
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-                Text(
-                  text,
-                  style: TextStyle(fontSize: 16, color: Colors.black87),
-                ),
-              ],
+      child: InkWell(
+        onTap: onClick,
+        child: Container(
+          height: 60,
+          width: MediaQuery.of(context).size.width * (0.8),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 10.0,
+              ),
+              child: Row(
+                children: [
+                  Image.asset(
+                    path,
+                    height: 25,
+                    width: 25,
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Text(
+                    text,
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
