@@ -14,6 +14,10 @@ class NetworkHandler {
     var response = await http.get(
       url,
     );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      log.i(response.body);
+      return json.decode(response.body);
+    }
     log.i(response.body);
     log.i(response.statusCode);
   }
@@ -22,6 +26,9 @@ class NetworkHandler {
     url = formater(url);
     var response = await http.post(
       url,
+      headers: {
+        "Content-type": "application/json",
+      },
       body: json.encode(body),
     );
     if (response.statusCode == 200 || response.statusCode == 201) {

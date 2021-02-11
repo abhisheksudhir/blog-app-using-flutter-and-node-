@@ -16,6 +16,9 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  String errorText;
+  bool validate = false;
+  bool circular = false;
   // final _usernameFocusNode = FocusNode();
   // final _emailFocusNode = FocusNode();
   // final _passwordFocusNode = FocusNode();
@@ -77,8 +80,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       height: 20,
                     ),
                     InkWell(
-                      onTap: () {
-                        if (_globalkey.currentState.validate()) {
+                      onTap: () async {
+                        setState(() {
+                          circular = true;
+                        });
+                        await checkUser();
+                        if (_globalkey.currentState.validate() && validate) {
                           // we send data to rest api server
                           Map<String, String> data = {
                             "username": _usernameController.text,
@@ -86,7 +93,14 @@ class _SignUpPageState extends State<SignUpPage> {
                             "password": _passwordController.text,
                           };
                           print(data);
-                          networkHandler.post("/user/register",data);
+                          await networkHandler.post("/user/register", data);
+                          setState(() {
+                            circular = false;
+                          });
+                        } else {
+                          setState(() {
+                            circular = false;
+                          });
                         }
                       },
                       child: Container(
@@ -97,14 +111,16 @@ class _SignUpPageState extends State<SignUpPage> {
                           color: Color(0xff00A86B),
                         ),
                         child: Center(
-                          child: Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: circular
+                              ? CircularProgressIndicator()
+                              : Text(
+                                  "Sign Up",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -116,6 +132,31 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
       ),
     );
+  }
+
+  checkUser() async {
+    if (_usernameController.text.length == 0) {
+      setState(() {
+        // circular = false;
+        validate = false;
+        errorText = "Username can't be empty";
+      });
+    } else {
+      var response = await networkHandler
+          .get("/user/checkusername/${_usernameController.text}");
+      if (response["Status"]) {
+        setState(() {
+          // circular = false;
+          validate = false;
+          errorText = "Username already taken";
+        });
+      } else {
+        setState(() {
+          // circular = false;
+          validate = true;
+        });
+      }
+    }
   }
 
   Widget usernameTextField() {
@@ -131,11 +172,8 @@ class _SignUpPageState extends State<SignUpPage> {
             // onFieldSubmitted: (_) {
             //   FocusScope.of(context).requestFocus(_emailFocusNode);
             // },
-            validator: (value) {
-              if (value.isEmpty) return "Username can't be empty";
-              return null;
-            },
             decoration: InputDecoration(
+              errorText: validate ? null : errorText,
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
                   color: Colors.black,
