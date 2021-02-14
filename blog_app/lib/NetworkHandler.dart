@@ -31,12 +31,7 @@ class NetworkHandler {
       },
       body: json.encode(body),
     );
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      log.i(response);
-      return response;
-    }
-    log.d(response.body);
-    log.d(response.statusCode);
+    return response;
   }
 
   String formater(String url) {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
@@ -15,9 +17,10 @@ class _SignInPageState extends State<SignInPage> {
   final _globalkey = GlobalKey<FormState>();
   NetworkHandler networkHandler = NetworkHandler();
   TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
-  String errorText;
+  // String errorText;
+  String errorTextUser;
+  String errorTextPass;
   bool validate = false;
   bool circular = false;
   // final _usernameFocusNode = FocusNode();
@@ -58,8 +61,7 @@ class _SignInPageState extends State<SignInPage> {
               ),
             ),
             child: SingleChildScrollView(
-              padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
               child: Form(
                 key: _globalkey,
                 child: Column(
@@ -121,7 +123,47 @@ class _SignInPageState extends State<SignInPage> {
                       height: 30,
                     ),
                     InkWell(
-                      onTap: () async {},
+                      onTap: () async {
+                        setState(() {
+                          circular = true;
+                        });
+                        if (_usernameController.text.length == 0 ||
+                            _passwordController.text.length == 0) {
+                          setState(() {
+                            circular = false;
+                            validate = false;
+                            errorTextUser = _usernameController.text.length == 0 ? "Username can't be empty" : null;
+                            errorTextPass = _passwordController.text.length == 0 ? "Password can't be empty" : null;
+                          });
+                        } else {
+                          Map<String, String> data = {
+                            "username": _usernameController.text,
+                            "password": _passwordController.text,
+                          };
+                          var response =
+                              await networkHandler.post("/user/login", data);
+                          if (response.statusCode == 200 ||
+                              response.statusCode == 201) {
+                            Map<String, dynamic> output =
+                                json.decode(response.body);
+                            print(output["token"]);
+                            setState(() {
+                              validate = true;
+                              circular = false;
+                            });
+                          } else {
+                            Map<String, dynamic> output =
+                                json.decode(response.body);
+                            setState(() {
+                              validate = false;
+                              // errorText = output["msg"];
+                              errorTextUser = output["msg"].contains("user") ? output["msg"] : null;
+                              errorTextPass = output["msg"].contains("password") ? output["msg"] : null;
+                              circular = false;
+                            });
+                          }
+                        }
+                      },
                       child: Container(
                         width: 150,
                         height: 50,
@@ -165,7 +207,7 @@ class _SignInPageState extends State<SignInPage> {
           //   FocusScope.of(context).requestFocus(_emailFocusNode);
           // },
           decoration: InputDecoration(
-            errorText: validate ? null : errorText,
+            errorText: validate ? null : errorTextUser,
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
                 color: Colors.black,
@@ -185,13 +227,9 @@ class _SignInPageState extends State<SignInPage> {
         TextFormField(
           controller: _passwordController,
           // focusNode: _passwordFocusNode,
-          validator: (value) {
-            if (value.isEmpty) return "Password can't be empty";
-            if (value.length < 8) return "Password lenght must have >=8";
-            return null;
-          },
           obscureText: vis,
           decoration: InputDecoration(
+            errorText: validate ? null : errorTextPass,
             suffixIcon: IconButton(
               icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
               onPressed: () {
