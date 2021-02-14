@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:blog_app/pages/WelcomePage.dart';
 import 'package:blog_app/pages/SignUpPage.dart';
+import 'package:blog_app/pages/SignInPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
       home: WelcomePage(),
       routes: {
         SignUpPage.routeName: (ctx) => SignUpPage(),
+        SignInPage.routeName: (ctx) => SignInPage(),
       },
     );
   }
