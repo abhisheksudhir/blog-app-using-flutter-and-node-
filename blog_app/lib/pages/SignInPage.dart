@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/pages/SignUpPage.dart';
+import 'package:blog_app/pages/HomePage.dart';
 
 class SignInPage extends StatefulWidget {
   static const routeName = '/sign-in';
@@ -23,6 +25,7 @@ class _SignInPageState extends State<SignInPage> {
   String errorTextPass;
   bool validate = false;
   bool circular = false;
+  final storage = new FlutterSecureStorage();
   // final _usernameFocusNode = FocusNode();
   // final _emailFocusNode = FocusNode();
   // final _passwordFocusNode = FocusNode();
@@ -132,8 +135,12 @@ class _SignInPageState extends State<SignInPage> {
                           setState(() {
                             circular = false;
                             validate = false;
-                            errorTextUser = _usernameController.text.length == 0 ? "Username can't be empty" : null;
-                            errorTextPass = _passwordController.text.length == 0 ? "Password can't be empty" : null;
+                            errorTextUser = _usernameController.text.length == 0
+                                ? "Username can't be empty"
+                                : null;
+                            errorTextPass = _passwordController.text.length == 0
+                                ? "Password can't be empty"
+                                : null;
                           });
                         } else {
                           Map<String, String> data = {
@@ -147,18 +154,32 @@ class _SignInPageState extends State<SignInPage> {
                             Map<String, dynamic> output =
                                 json.decode(response.body);
                             print(output["token"]);
+                            // Write value
+                            await storage.write(
+                                key: "token", value: output["token"]);
                             setState(() {
                               validate = true;
                               circular = false;
                             });
+                            // Navigator.pushAndRemoveUntil(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //       builder: (context) => HomePage(),
+                            //     ),
+                            //     (route) => false);
+                            Navigator.of(context).pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
                           } else {
                             Map<String, dynamic> output =
                                 json.decode(response.body);
                             setState(() {
                               validate = false;
                               // errorText = output["msg"];
-                              errorTextUser = output["msg"].contains("user") ? output["msg"] : null;
-                              errorTextPass = output["msg"].contains("password") ? output["msg"] : null;
+                              errorTextUser = output["msg"].contains("user")
+                                  ? output["msg"]
+                                  : null;
+                              errorTextPass = output["msg"].contains("password")
+                                  ? output["msg"]
+                                  : null;
                               circular = false;
                             });
                           }

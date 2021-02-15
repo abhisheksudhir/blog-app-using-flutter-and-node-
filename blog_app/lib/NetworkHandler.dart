@@ -5,8 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class NetworkHandler {
-  String baseurl =
-      "http://192.168.0.104:5000"; // instead localhost add your ip address here
+  // String baseurl =
+  //     "http://192.168.0.104:5000"; // instead localhost add your ip address here
+  String baseurl = "http://1ccbf5666e5d.ngrok.io"; // add your ngrok forwarding to connect to real device
   var log = Logger();
 
   Future get(String url) async {

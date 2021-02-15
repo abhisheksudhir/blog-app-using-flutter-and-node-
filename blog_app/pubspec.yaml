@@ -27,6 +27,7 @@ dependencies:
   http: ^0.12.2
   logger: ^0.9.4
   flutter_facebook_login: ^3.0.0
+  flutter_secure_storage: ^3.3.5
 
 
   # The following adds the Cupertino Icons font to your application.

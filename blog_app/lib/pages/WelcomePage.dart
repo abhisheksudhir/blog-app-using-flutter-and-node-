@@ -96,7 +96,7 @@ class _WelcomePageState extends State<WelcomePage>
                   ),
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height / 6,
+                  height: MediaQuery.of(context).size.height / 10,
                 ),
                 SlideTransition(
                   position: animation2,
