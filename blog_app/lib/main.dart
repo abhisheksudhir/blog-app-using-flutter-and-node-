@@ -13,18 +13,27 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        textTheme: GoogleFonts.openSansTextTheme(
-          Theme.of(context).textTheme,
-        ),
-      ),
-      home: WelcomePage(),
-      routes: {
-        SignUpPage.routeName: (ctx) => SignUpPage(),
-        SignInPage.routeName: (ctx) => SignInPage(),
-        HomePage.routeName: (ctx) => HomePage(),
+    return GestureDetector(
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus &&
+            currentFocus.focusedChild != null) {
+          currentFocus.focusedChild.unfocus();
+        }
       },
+      child: MaterialApp(
+        theme: ThemeData(
+          textTheme: GoogleFonts.openSansTextTheme(
+            Theme.of(context).textTheme,
+          ),
+        ),
+        home: WelcomePage(),
+        routes: {
+          SignUpPage.routeName: (ctx) => SignUpPage(),
+          SignInPage.routeName: (ctx) => SignInPage(),
+          HomePage.routeName: (ctx) => HomePage(),
+        },
+      ),
     );
   }
 }

@@ -61,6 +61,23 @@ router.get("/checkusername/:username", async (req, res, next) => {
   }
 });
 
+router.get("/checkemail/:email", async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.params.email });
+    if (user !== null) {
+      return res.json({
+        Status: true,
+      });
+    } else
+      return res.json({
+        Status: false,
+      });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+    next(err);
+  }
+});
+
 router.post("/login", async (req, res, next) => {
   try {
     const user = await User.findOne({ username: req.body.username });

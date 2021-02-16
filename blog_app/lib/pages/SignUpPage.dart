@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
+import 'package:blog_app/pages/HomePage.dart';
 
 class SignUpPage extends StatefulWidget {
   static const routeName = '/sign-up';
@@ -17,8 +21,11 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   String errorText;
+  String errorTextUser;
+  String errorTextEmail;
   bool validate = false;
   bool circular = false;
+  final storage = new FlutterSecureStorage();
   // final _usernameFocusNode = FocusNode();
   // final _emailFocusNode = FocusNode();
   // final _passwordFocusNode = FocusNode();
@@ -34,98 +41,123 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (_) {
-        FocusScopeNode currentFocus = FocusScope.of(context);
-        if (!currentFocus.hasPrimaryFocus &&
-            currentFocus.focusedChild != null) {
-          currentFocus.focusedChild.unfocus();
-        }
-      },
-      child: Scaffold(
-        body: SafeArea(
-          child: Container(
-            alignment: Alignment.center,
-            // height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.white, Colors.green[200]],
-                begin: const FractionalOffset(0.0, 1.0),
-                end: const FractionalOffset(0.0, 1.0),
-                stops: [0.0, 1.0],
-                tileMode: TileMode.repeated,
-              ),
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          alignment: Alignment.center,
+          // height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.white, Colors.green[200]],
+              begin: const FractionalOffset(0.0, 1.0),
+              end: const FractionalOffset(0.0, 1.0),
+              stops: [0.0, 1.0],
+              tileMode: TileMode.repeated,
             ),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _globalkey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Sign up with email",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                      ),
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _globalkey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Sign up with email",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    usernameTextField(),
-                    emailTextField(),
-                    passwordTextField(),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    InkWell(
-                      onTap: () async {
-                        setState(() {
-                          circular = true;
-                        });
-                        await checkUser();
-                        if (_globalkey.currentState.validate() && validate) {
-                          // we send data to rest api server
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  usernameTextField(),
+                  emailTextField(),
+                  passwordTextField(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  InkWell(
+                    onTap: () async {
+                      setState(() {
+                        circular = true;
+                      });
+                      await checkUserAndEmail();
+                      if (_globalkey.currentState.validate() && validate) {
+                        // we send data to rest api server
+                        Map<String, String> data = {
+                          "username": _usernameController.text,
+                          "email": _emailController.text,
+                          "password": _passwordController.text,
+                        };
+                        print(data);
+                        var responseRegister =
+                            await networkHandler.post("/user/register", data);
+                        if (responseRegister.statusCode == 200 ||
+                            responseRegister.statusCode == 201) {
                           Map<String, String> data = {
                             "username": _usernameController.text,
-                            "email": _emailController.text,
                             "password": _passwordController.text,
                           };
-                          print(data);
-                          await networkHandler.post("/user/register", data);
-                          setState(() {
-                            circular = false;
-                          });
-                        } else {
-                          setState(() {
-                            circular = false;
-                          });
+                          var response =
+                              await networkHandler.post("/user/login", data);
+
+                          if (response.statusCode == 200 ||
+                              response.statusCode == 201) {
+                            Map<String, dynamic> output =
+                                json.decode(response.body);
+                            print(output["token"]);
+                            await storage.write(
+                              key: "token",
+                              value: output["token"],
+                            );
+                            setState(() {
+                              validate = true;
+                              circular = false;
+                            });
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                                HomePage.routeName, (route) => false);
+                          } else {
+                            Scaffold.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Netwok Error"),
+                              ),
+                            );
+                          }
                         }
-                      },
-                      child: Container(
-                        width: 150,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Color(0xff00A86B),
-                        ),
-                        child: Center(
-                          child: circular
-                              ? CircularProgressIndicator()
-                              : Text(
-                                  "Sign Up",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+
+                        setState(() {
+                          circular = false;
+                        });
+                      } else {
+                        setState(() {
+                          circular = false;
+                        });
+                      }
+                    },
+                    child: circular
+                        ? CircularProgressIndicator()
+                        : Container(
+                            width: 150,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Color(0xff00A86B),
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Sign Up",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -134,21 +166,33 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  checkUser() async {
-    if (_usernameController.text.length == 0) {
+  checkUserAndEmail() async {
+    if (_usernameController.text.length == 0 ||
+        (_emailController.text.length == 0 || !_emailController.text.contains("@"))) {
       setState(() {
         // circular = false;
         validate = false;
-        errorText = "Username can't be empty";
+        errorTextUser = _usernameController.text.length == 0
+            ? "Username can't be empty"
+            : null;
+        errorTextEmail = _emailController.text.length == 0
+            ? "Email can't be empty"
+            : (!_emailController.text.contains("@")
+                ? "Email is Invalid"
+                : null);
       });
     } else {
+      print("123");
       var response = await networkHandler
           .get("/user/checkusername/${_usernameController.text}");
-      if (response["Status"]) {
+      var response1 = await networkHandler
+          .get("/user/checkemail/${_emailController.text}");
+      if (response["Status"] || response1["Status"]) {
         setState(() {
           // circular = false;
           validate = false;
-          errorText = "Username already taken";
+          errorTextUser = response["Status"] ? "Username already taken": null;
+          errorTextEmail = response1["Status"] ? "Email already taken" : null;
         });
       } else {
         setState(() {
@@ -173,7 +217,7 @@ class _SignUpPageState extends State<SignUpPage> {
             //   FocusScope.of(context).requestFocus(_emailFocusNode);
             // },
             decoration: InputDecoration(
-              errorText: validate ? null : errorText,
+              errorText: validate ? null : errorTextUser,
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
                   color: Colors.black,
@@ -201,12 +245,13 @@ class _SignUpPageState extends State<SignUpPage> {
             // onFieldSubmitted: (_) {
             //   FocusScope.of(context).requestFocus(_passwordFocusNode);
             // },
-            validator: (value) {
-              if (value.isEmpty) return "Email can't be empty";
-              if (!value.contains("@")) return "Email is Invalid";
-              return null;
-            },
+            // validator: (value) {
+            //   if (value.isEmpty) return "Email can't be empty";
+            //   if (!value.contains("@")) return "Email is Invalid";
+            //   return null;
+            // },
             decoration: InputDecoration(
+              errorText: validate ? null : errorTextEmail,
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
                   color: Colors.black,
