@@ -84,7 +84,30 @@ class _SignUpPageState extends State<SignUpPage> {
                         circular = true;
                       });
                       await checkUserAndEmail();
-                      if (_globalkey.currentState.validate() && validate) {
+                      // if (networkErr) {
+                      //   showDialog(
+                      //     context: context,
+                      //     builder: (BuildContext context) {
+                      //       return AlertDialog(
+                      //         title: Text("Error"),
+                      //         content: Text("Network Error."),
+                      //         actions: <Widget>[
+                      //           FlatButton(
+                      //             child: new Text("Cancel"),
+                      //             onPressed: () {
+                      //               Navigator.of(context).pop();
+                      //             },
+                      //           ),
+                      //         ],
+                      //       );
+                      //     },
+                      //   );
+                      //   setState(() {
+                      //     circular = false;
+                      //   });
+                      // } 
+                      if (_globalkey.currentState.validate() &&
+                          validate) {
                         // we send data to rest api server
                         Map<String, String> data = {
                           "username": _usernameController.text,
@@ -168,7 +191,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   checkUserAndEmail() async {
     if (_usernameController.text.length == 0 ||
-        (_emailController.text.length == 0 || !_emailController.text.contains("@"))) {
+        (_emailController.text.length == 0 ||
+            !_emailController.text.contains("@"))) {
       setState(() {
         // circular = false;
         validate = false;
@@ -185,18 +209,26 @@ class _SignUpPageState extends State<SignUpPage> {
       print("123");
       var response = await networkHandler
           .get("/user/checkusername/${_usernameController.text}");
-      var response1 = await networkHandler
-          .get("/user/checkemail/${_emailController.text}");
+      var response1 =
+          await networkHandler.get("/user/checkemail/${_emailController.text}");
+      // if (response == null || response1 == null) {
+      //   setState(() {
+      //     // circular = false;
+      //     networkErr = true;
+      //   });
+      // } 
       if (response["Status"] || response1["Status"]) {
         setState(() {
           // circular = false;
+          // networkErr = false;
           validate = false;
-          errorTextUser = response["Status"] ? "Username already taken": null;
+          errorTextUser = response["Status"] ? "Username already taken" : null;
           errorTextEmail = response1["Status"] ? "Email already taken" : null;
         });
       } else {
         setState(() {
           // circular = false;
+          // networkErr = false;
           validate = true;
         });
       }
