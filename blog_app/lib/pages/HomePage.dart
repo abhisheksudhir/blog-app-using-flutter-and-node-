@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:blog_app/screen/HomeScreen.dart';
+import 'package:blog_app/screen/ProfileScreen.dart';
+
 class HomePage extends StatefulWidget {
   static const routeName = '/home';
 
@@ -8,9 +11,75 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int currentState = 0;
+  List<Widget> widgets = [HomeScreen(), ProfileScreen()];
+  List<String> titleString = ["Home Page", "Profile Page"];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.teal,
+        title: Text(
+          titleString[currentState],
+        ),
+        centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            DrawerHeader(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text("@username"),
+                ],
+              ),
+            ),
+            ListTile(
+              title: Text("All Post"),
+              trailing: Icon(Icons.launch),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("New Story"),
+              trailing: Icon(Icons.add),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("Settings"),
+              trailing: Icon(Icons.settings),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("Feedback"),
+              trailing: Icon(Icons.feedback),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("Logout"),
+              trailing: Icon(Icons.power_settings_new),
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.teal,
@@ -35,17 +104,21 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 IconButton(
                   icon: Icon(Icons.home),
-                  color: Colors.white,
+                  color: currentState == 0 ? Colors.white : Colors.white54,
                   onPressed: () {
-                    null;
+                    setState(() {
+                      currentState = 0;
+                    });
                   },
                   iconSize: 40,
                 ),
                 IconButton(
                   icon: Icon(Icons.person),
-                  color: Colors.white,
+                  color: currentState == 1 ? Colors.white : Colors.white54,
                   onPressed: () {
-                    null;
+                    setState(() {
+                      currentState = 1;
+                    });
                   },
                   iconSize: 40,
                 )
@@ -54,11 +127,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: SafeArea(
-        child: Center(
-          child: Text("Welcome to Blog App"),
-        ),
-      ),
+      body: widgets[currentState],
     );
   }
 }
