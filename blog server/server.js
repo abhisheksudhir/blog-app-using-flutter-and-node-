@@ -20,8 +20,10 @@ connection.once("open", () => {
 app.use(express.json());    //to parse json
 
 const userRoute = require("./routes/user");
+const profileRoute = require("./routes/profile");
 
 app.use("/user", userRoute);
+app.use("/profile", profileRoute);
 
 app.route("/").get((req, res) => res.json("your first rest api"));
 
