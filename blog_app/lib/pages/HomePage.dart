@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:blog_app/screen/HomeScreen.dart';
-import 'package:blog_app/screen/ProfileScreen.dart';
+import 'package:blog_app/profile/ProfileScreen.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home';

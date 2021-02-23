@@ -8,6 +8,8 @@ import 'package:blog_app/pages/SignUpPage.dart';
 import 'package:blog_app/pages/SignInPage.dart';
 
 class WelcomePage extends StatefulWidget {
+  static const routeName = '/welcome-page';
+
   @override
   _WelcomePageState createState() => _WelcomePageState();
 }

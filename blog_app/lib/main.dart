@@ -6,6 +6,9 @@ import 'package:blog_app/pages/WelcomePage.dart';
 import 'package:blog_app/pages/SignUpPage.dart';
 import 'package:blog_app/pages/SignInPage.dart';
 import 'package:blog_app/pages/HomePage.dart';
+import 'package:blog_app/screen/HomeScreen.dart';
+import 'package:blog_app/profile/ProfileScreen.dart';
+import 'package:blog_app/profile/CreateProfile.dart';
 
 void main() {
   runApp(MyApp());
@@ -60,6 +63,10 @@ class _MyAppState extends State<MyApp> {
           SignUpPage.routeName: (ctx) => SignUpPage(),
           SignInPage.routeName: (ctx) => SignInPage(),
           HomePage.routeName: (ctx) => HomePage(),
+          WelcomePage.routeName: (ctx) => WelcomePage(),
+          ProfileScreen.routeName: (ctx) => ProfileScreen(),
+          HomeScreen.routeName: (ctx) => HomeScreen(),
+          CreateProfile.routeName: (ctx) => CreateProfile(),
         },
       ),
     );
