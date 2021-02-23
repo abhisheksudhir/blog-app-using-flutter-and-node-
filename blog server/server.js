@@ -17,6 +17,8 @@ connection.once("open", () => {
   console.log("MongoDb connected");
 });
 
+app.use("/uploads", express.static("uploads")); //to make this folder accessible to browser
+
 app.use(express.json());    //to parse json
 
 const userRoute = require("./routes/user");
