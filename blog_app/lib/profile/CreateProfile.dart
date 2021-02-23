@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateProfile extends StatefulWidget {
   static const routeName = '/create-profile';
@@ -14,6 +17,8 @@ class _CreateProfileState extends State<CreateProfile> {
   TextEditingController _dob = TextEditingController();
   TextEditingController _title = TextEditingController();
   TextEditingController _about = TextEditingController();
+  PickedFile _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +28,10 @@ class _CreateProfileState extends State<CreateProfile> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
           children: [
+            imageProfile(),
+            SizedBox(
+              height: 20,
+            ),
             nameTextField(),
             SizedBox(
               height: 20,
@@ -47,6 +56,90 @@ class _CreateProfileState extends State<CreateProfile> {
         ),
       ),
     );
+  }
+
+  Widget imageProfile() {
+    return Center(
+      child: Stack(children: <Widget>[
+        CircleAvatar(
+          radius: 80.0,
+          backgroundImage: _imageFile == null
+              ? AssetImage("assets/profile.jpeg")
+              : FileImage(File(_imageFile.path)),
+        ),
+        Positioned(
+          bottom: 20.0,
+          right: 20.0,
+          child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: ((builder) => bottomSheet()),
+              );
+            },
+            child: Icon(
+              Icons.camera_alt,
+              color: Colors.teal,
+              size: 28.0,
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget bottomSheet() {
+    return Container(
+      height: 100.0,
+      width: MediaQuery.of(context).size.width,
+      margin: EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 20,
+      ),
+      child: Column(
+        children: <Widget>[
+          Text(
+            "Choose Profile photo",
+            style: TextStyle(
+              fontSize: 20.0,
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FlatButton.icon(
+                icon: Icon(Icons.camera),
+                onPressed: () {
+                  takePhoto(ImageSource.camera);
+                  Navigator.pop(context);
+                },
+                label: Text("Camera"),
+              ),
+              FlatButton.icon(
+                icon: Icon(Icons.image),
+                onPressed: () {
+                  takePhoto(ImageSource.gallery);
+                  Navigator.pop(context);
+                },
+                label: Text("Gallery"),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<void> takePhoto(ImageSource source) async {
+    final pickedFile = await _picker.getImage(
+      source: source,
+    );
+    setState(() {
+      _imageFile = pickedFile;
+    });
   }
 
   Widget nameTextField() {
