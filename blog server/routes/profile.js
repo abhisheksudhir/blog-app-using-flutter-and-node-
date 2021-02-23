@@ -30,6 +30,25 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
+router.get("/checkProfile", middleware.checkToken, async (req, res, next) => {
+  try {
+    const profile = await Profile.findOne({ username: req.user.username });
+    if (profile !== null) {
+      return res.json({
+        Status: true,
+        username: req.user.username,
+      });
+    } else
+      return res.json({
+        Status: false,
+        username: req.user.username,
+      });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+    next(err);
+  }
+});
+
 router.post("/add", middleware.checkToken, async (req, res, next) => {
   try {
     const profileexist = await Profile.findOne({

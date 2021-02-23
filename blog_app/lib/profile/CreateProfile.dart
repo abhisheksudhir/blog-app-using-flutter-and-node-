@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:blog_app/NetworkHandler.dart';
+import 'package:blog_app/pages/HomePage.dart';
+
 class CreateProfile extends StatefulWidget {
   static const routeName = '/create-profile';
 
@@ -11,6 +14,7 @@ class CreateProfile extends StatefulWidget {
 }
 
 class _CreateProfileState extends State<CreateProfile> {
+  final networkHandler = NetworkHandler();
   final _globalkey = GlobalKey<FormState>();
   TextEditingController _name = TextEditingController();
   TextEditingController _profession = TextEditingController();
@@ -51,6 +55,42 @@ class _CreateProfileState extends State<CreateProfile> {
             aboutTextField(),
             SizedBox(
               height: 20,
+            ),
+            InkWell(
+              onTap: () async {
+                if (_globalkey.currentState.validate()) {
+                  Map<String, String> data = {
+                    "name": _name.text,
+                    "profession": _profession.text,
+                    "DOB": _dob.text,
+                    "titleline": _title.text,
+                    "about": _about.text,
+                  };
+                  var response =
+                      await networkHandler.post("/profile/add", data);
+                  print(response.statusCode);
+                }
+              },
+              child: Center(
+                child: Container(
+                  width: 200,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.teal,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Submit",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/profile/CreateProfile.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -10,11 +11,38 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  NetworkHandler networkHandler = NetworkHandler();
+  Widget page = Center(child: CircularProgressIndicator());
+  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkProfile();
+  }
+
+  void checkProfile() async {
+    var response = await networkHandler.get("/profile/checkProfile");
+    if (response["Status"] == true) {
+      setState(() {
+        page = showProfile();
+      });
+    } else {
+      setState(() {
+        page = button();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: button(),
+      body: page,
     );
+  }
+
+  Widget showProfile() {
+    return Center(child: Text("Profile Data is Avalable"));
   }
 
   Widget button() {
@@ -38,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           InkWell(
             onTap: () {
               Navigator.of(context)
-                  .pushReplacementNamed(CreateProfile.routeName);
+                  .pushNamed(CreateProfile.routeName);
             },
             child: Container(
               height: 60,
