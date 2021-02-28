@@ -9,7 +9,7 @@ class NetworkHandler {
   // String baseurl =
   //     "http://192.168.0.104:5000"; // instead localhost add your ip address here
   String baseurl =
-      "http://288d2434ccc5.ngrok.io"; // add your ngrok forwarding to connect to real device
+      "http://5b52b66434b7.ngrok.io"; // add your ngrok forwarding to connect to real device
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
 
@@ -40,6 +40,19 @@ class NetworkHandler {
       },
       body: json.encode(body),
     );
+    return response;
+  }
+
+  Future<http.StreamedResponse> patchImage(String url, String filepath) async {
+    url = formater(url);
+    String token = await storage.read(key: "token");
+    var request = http.MultipartRequest('PATCH', Uri.parse(url));
+    request.files.add(await http.MultipartFile.fromPath("img", filepath));
+    request.headers.addAll({
+      "Content-type": "multipart/form-data",
+      "Authorization": "Bearer $token"
+    });
+    var response = request.send();
     return response;
   }
 

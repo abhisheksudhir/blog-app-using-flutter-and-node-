@@ -27,7 +27,7 @@ const upload = multer({
   limits: {
     fileSize: 1024 * 1024 * 6, //1024kb*1024kb = 1mb; 1mb * 6 = 6mb
   },
-  fileFilter: fileFilter,
+  // fileFilter: fileFilter, // removing filter as the type we get from frontend isn't jpeg or png
 });
 
 router.get("/checkProfile", middleware.checkToken, async (req, res, next) => {

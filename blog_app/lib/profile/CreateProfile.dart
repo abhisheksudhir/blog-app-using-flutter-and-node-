@@ -15,6 +15,7 @@ class CreateProfile extends StatefulWidget {
 
 class _CreateProfileState extends State<CreateProfile> {
   final networkHandler = NetworkHandler();
+  bool circular = false;
   final _globalkey = GlobalKey<FormState>();
   TextEditingController _name = TextEditingController();
   TextEditingController _profession = TextEditingController();
@@ -58,6 +59,9 @@ class _CreateProfileState extends State<CreateProfile> {
             ),
             InkWell(
               onTap: () async {
+                setState(() {
+                  circular = true;
+                });
                 if (_globalkey.currentState.validate()) {
                   Map<String, String> data = {
                     "name": _name.text,
@@ -68,7 +72,26 @@ class _CreateProfileState extends State<CreateProfile> {
                   };
                   var response =
                       await networkHandler.post("/profile/add", data);
-                  print(response.statusCode);
+                  if (response.statusCode == 200 ||
+                      response.statusCode == 201) {
+                    if (_imageFile != null) {
+                      var imageResponse = await networkHandler.patchImage(
+                          "/profile/add/image", _imageFile.path);
+                      if (imageResponse.statusCode == 200) {
+                        setState(() {
+                          circular = false;
+                        });
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            HomePage.routeName, (route) => false);
+                      }
+                    } else {
+                      setState(() {
+                        circular = false;
+                      });
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          HomePage.routeName, (route) => false);
+                    }
+                  }
                 }
               },
               child: Center(
@@ -80,14 +103,16 @@ class _CreateProfileState extends State<CreateProfile> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
-                    child: Text(
-                      "Submit",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: circular
+                        ? CircularProgressIndicator()
+                        : Text(
+                            "Submit",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ),
