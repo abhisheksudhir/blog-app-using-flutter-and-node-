@@ -1,34 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
+
+const cloud = require("../cloudinaryconfig");
+const file = require("../fileupload");
+
 const Profile = require("../models/profile.model");
 const middleware = require("../middlewares/auth");
-const path = require("path");
-
-const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, "./uploads");
-  },
-  filename: (req, file, callback) => {
-    callback(null, req.user.username + ".jpg");
-  },
-});
-
-const fileFilter = (req, file, callback) => {
-  if (file.mimetype == "image/jpeg" || file.mimetype == "image/png") {
-    callback(null, true);
-  } else {
-    callback(null, false);
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 6, //1024kb*1024kb = 1mb; 1mb * 6 = 6mb
-  },
-  // fileFilter: fileFilter, // removing filter as the type we get from frontend isn't jpeg or png
-});
 
 router.get("/checkProfile", middleware.checkToken, async (req, res, next) => {
   try {
@@ -78,30 +55,83 @@ router.post("/add", middleware.checkToken, async (req, res, next) => {
 router.patch(
   "/add/image",
   middleware.checkToken,
-  upload.single("img"), // image is used as key in form body
+  file.multerUpload.single("img"), // image is used as key in form body
   async (req, res, next) => {
     try {
-      const profile_exist = await Profile.findOne({
-        username: req.user.username,
-      });
-      if (profile_exist === null) {
-        throw new Error("Profile does not exist");
+      if (req.file) {
+        const profile_exist = await Profile.findOne({
+          username: req.user.username,
+        });
+        if (profile_exist === null) {
+          throw new Error("Profile does not exist");
+        }
+        const old_public_id = profile_exist.img.public_id;
+        const image = file.dataUri(req).content;
+        const result = await cloud.uploader.upload(image, {
+          folder: "blog_app/profiles",
+          // use_filename: true,
+          unique_filename: true,
+        });
+        if(old_public_id!="") {
+          console.log("deleting image");
+          const del = await cloud.uploader.destroy(old_public_id);
+        }
+        const profile = await Profile.findOneAndUpdate(
+          { username: req.user.username },
+          { $set: { "img.url": result.url, "img.public_id": result.public_id } },
+          { new: true }
+        );
+        const msg = {
+          msg: "image updated successfully",
+          data: profile.toJSON(),
+        };
+        res.status(200).json({ msg });
+      } else {
+        throw new Error("File not added");
       }
-      const profile = await Profile.findOneAndUpdate(
-        { username: req.user.username },
-        { $set: { img: req.file.path } },
-        { new: true }
-      );
-      const msg = {
-        msg: "image updated successfully",
-        data: profile.toJSON(),
-      };
-      res.status(200).json({ msg });
     } catch (err) {
       res.status(500).json({ msg: err.message });
       next(err);
     }
   }
 );
+
+// router.post(
+//   "/imagetest",
+//   file.multerUpload.single("img"), // image is used as key in form body
+//   async (req, res, next) => {
+//     try {
+//       if (req.file) {
+//         const image = file.dataUri(req).content;
+//         const result = await cloud.uploader.upload(image, {
+//           folder: "blog_app/profiles",
+//           // use_filename: true,
+//           unique_filename: true,
+//         });
+//         const msg = {
+//           msg: "image updated successfully",
+//           "img.url": result.url,
+//           "img.public_id": result.public_id,
+//         };
+//         res.status(200).json({ msg });
+//       } else {
+//         throw new Error("File not added");
+//       }
+//     } catch (err) {
+//       res.status(500).json({ msg: err.message });
+//       next(err);
+//     }
+//   }
+// );
+
+// router.delete("/imagetest", async (req, res, next) => {
+//   try {
+//     const result = await cloud.uploader.destroy(req.body.img.public_id);
+//     res.status(200).json(result);
+//   } catch (err) {
+//     res.status(500).json({ msg: err.message });
+//     next(err);
+//   }
+// });
 
 module.exports = router;

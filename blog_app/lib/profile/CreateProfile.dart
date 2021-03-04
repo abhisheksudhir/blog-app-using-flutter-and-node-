@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/pages/HomePage.dart';
@@ -14,6 +16,22 @@ class CreateProfile extends StatefulWidget {
 }
 
 class _CreateProfileState extends State<CreateProfile> {
+  @override
+  void initState() {
+    getImageFileFromAssets();
+    super.initState();
+  }
+
+  Future<void> getImageFileFromAssets() async {
+    // final byteData = await rootBundle.load("assets/profile.jpeg");
+    final file = File('${(await getTemporaryDirectory()).path}/profile.jpeg');
+    // await file.writeAsBytes(byteData.buffer
+    //     .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    setState(() {
+      _imageFile = PickedFile(file.path);
+    });
+  }
+
   final networkHandler = NetworkHandler();
   bool circular = false;
   final _globalkey = GlobalKey<FormState>();
@@ -161,39 +179,46 @@ class _CreateProfileState extends State<CreateProfile> {
         horizontal: 20,
         vertical: 20,
       ),
-      child: Column(
-        children: <Widget>[
-          Text(
-            "Choose Profile photo",
-            style: TextStyle(
-              fontSize: 20.0,
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Text(
+              "Choose Profile photo",
+              style: TextStyle(
+                fontSize: 20.0,
+              ),
             ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              FlatButton.icon(
-                icon: Icon(Icons.camera),
-                onPressed: () {
-                  takePhoto(ImageSource.camera);
-                  Navigator.pop(context);
-                },
-                label: Text("Camera"),
-              ),
-              FlatButton.icon(
-                icon: Icon(Icons.image),
-                onPressed: () {
-                  takePhoto(ImageSource.gallery);
-                  Navigator.pop(context);
-                },
-                label: Text("Gallery"),
-              ),
-            ],
-          )
-        ],
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                FlatButton.icon(
+                  icon: Icon(Icons.camera),
+                  onPressed: () {
+                    FocusScopeNode currentFocus = FocusScope.of(context);
+                    if (!currentFocus.hasPrimaryFocus &&
+                        currentFocus.focusedChild != null) {
+                      currentFocus.focusedChild.unfocus();
+                    }
+                    takePhoto(ImageSource.camera);
+                    Navigator.pop(context);
+                  },
+                  label: Text("Camera"),
+                ),
+                FlatButton.icon(
+                  icon: Icon(Icons.image),
+                  onPressed: () {
+                    takePhoto(ImageSource.gallery);
+                    Navigator.pop(context);
+                  },
+                  label: Text("Gallery"),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
