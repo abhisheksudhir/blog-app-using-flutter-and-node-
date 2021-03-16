@@ -26,12 +26,30 @@ router.get("/checkProfile", middleware.checkToken, async (req, res, next) => {
   }
 });
 
+router.get("/getData", middleware.checkToken, async (req, res, next) => {
+  try {
+    const profile = await Profile.findOne({ username: req.user.username });
+
+    if (!profile) {
+      throw new Error("No such profile found");
+    }
+    res.status(200).json({ data: profile });
+  } catch (err) {
+    if ((err.message = "No such profile found")) {
+      res.status(401).json({ data: [] });
+    } else {
+      res.status(500).json({ msg: err.message });
+      next(err);
+    }
+  }
+});
+
 router.post("/add", middleware.checkToken, async (req, res, next) => {
   try {
-    const profileexist = await Profile.findOne({
+    const profile_exist = await Profile.findOne({
       username: req.user.username,
     });
-    if (profileexist !== null) {
+    if (profile_exist !== null) {
       throw new Error("User already has created the profile");
     }
     const profile = await Profile.create({
@@ -72,13 +90,15 @@ router.patch(
           // use_filename: true,
           unique_filename: true,
         });
-        if(old_public_id!="") {
+        if (old_public_id != "") {
           console.log("deleting image");
           const del = await cloud.uploader.destroy(old_public_id);
         }
         const profile = await Profile.findOneAndUpdate(
           { username: req.user.username },
-          { $set: { "img.url": result.url, "img.public_id": result.public_id } },
+          {
+            $set: { "img.url": result.url, "img.public_id": result.public_id },
+          },
           { new: true }
         );
         const msg = {
@@ -95,6 +115,43 @@ router.patch(
     }
   }
 );
+
+router.patch("/update", middleware.checkToken, async (req, res, next) => {
+  try {
+    const profile_exist = await Profile.findOne({
+      username: req.user.username,
+    });
+    if (profile_exist === null) {
+      throw new Error("No such profile found");
+    }
+
+    const profile = await Profile.findOneAndUpdate(
+      { username: req.user.username },
+      {
+        $set: {
+          name: req.body.name ? req.body.name : profile_exist.name,
+          profession: req.body.profession
+            ? req.body.profession
+            : profile_exist.profession,
+          DOB: req.body.DOB ? req.body.DOB : profile_exist.DOB,
+          titleline: req.body.titleline
+            ? req.body.titleline
+            : profile_exist.titleline,
+          about: req.body.about ? req.body.about : profile_exist.about, //about:""
+        },
+      },
+      { new: true }
+    );
+    res.status(200).json({ data: profile });
+  } catch (err) {
+    if ((err.message = "No such profile found")) {
+      res.status(401).json({ data: [] });
+    } else {
+      res.status(500).json({ msg: err.message });
+      next(err);
+    }
+  }
+});
 
 // router.post(
 //   "/imagetest",
