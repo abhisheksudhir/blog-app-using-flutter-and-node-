@@ -9,6 +9,7 @@ import 'package:blog_app/pages/HomePage.dart';
 import 'package:blog_app/screen/HomeScreen.dart';
 import 'package:blog_app/profile/ProfileScreen.dart';
 import 'package:blog_app/profile/CreateProfile.dart';
+import 'package:blog_app/profile/MainProfile.dart';
 
 void main() {
   runApp(MyApp());
@@ -67,6 +68,7 @@ class _MyAppState extends State<MyApp> {
           ProfileScreen.routeName: (ctx) => ProfileScreen(),
           HomeScreen.routeName: (ctx) => HomeScreen(),
           CreateProfile.routeName: (ctx) => CreateProfile(),
+          MainProfile.routeName: (ctx) => MainProfile(),
         },
       ),
     );

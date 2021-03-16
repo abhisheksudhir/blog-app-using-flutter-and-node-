@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/profile/CreateProfile.dart';
+import 'package:blog_app/profile/MainProfile.dart';
 
 class ProfileScreen extends StatefulWidget {
   static const routeName = '/profile-screen';
@@ -25,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     var response = await networkHandler.get("/profile/checkProfile");
     if (response["Status"] == true) {
       setState(() {
-        page = showProfile();
+        page = MainProfile();
       });
     } else {
       setState(() {
