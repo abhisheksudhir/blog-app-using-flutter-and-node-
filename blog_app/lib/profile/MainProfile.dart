@@ -32,9 +32,9 @@ class _MainProfileState extends State<MainProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xffEEEEFF),
-      body: circular
+    return Container(
+      // backgroundColor: Color(0xffEEEEFF),
+      child: circular
           ? Center(child: CircularProgressIndicator())
           : Stack(
               children: [
@@ -74,7 +74,7 @@ class _MainProfileState extends State<MainProfile> {
                     padding: EdgeInsets.all(20),
                     icon: Icon(Icons.edit),
                     onPressed: () {},
-                    color: Colors.black,
+                    color: Colors.teal,
                   ),
                 ),
               ],

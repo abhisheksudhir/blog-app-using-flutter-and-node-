@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -9,51 +10,63 @@ class NetworkHandler {
   // String baseurl =
   //     "http://192.168.0.104:5000"; // instead localhost add your ip address here
   String baseurl =
-      "http://15f66bb3215e.ngrok.io"; // add your ngrok forwarding to connect to real device
+      "https://82694aee58ff.ngrok.io"; // add your ngrok forwarding to connect to real device
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
 
   Future get(String url) async {
     String token = await storage.read(key: "token");
     url = formater(url);
-    var response = await http.get(
-      url,
-      headers: {"Authorization": "Bearer $token"},
-    );
-    if (response.statusCode == 200 || response.statusCode == 201) {
+    try {
+      var response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $token"},
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log.i(response.body);
+        return json.decode(response.body);
+      }
       log.i(response.body);
-      return json.decode(response.body);
+      log.i(response.statusCode);
+    } catch (err) {
+      return null;
     }
-    log.i(response.body);
-    log.i(response.statusCode);
   }
 
   Future<http.Response> post(String url, Map<String, String> body) async {
     String token = await storage.read(key: "token");
     url = formater(url);
     log.d(body);
-    var response = await http.post(
-      url,
-      headers: {
-        "Content-type": "application/json",
-        "Authorization": "Bearer $token"
-      },
-      body: json.encode(body),
-    );
-    return response;
+    try {
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-type": "application/json",
+          "Authorization": "Bearer $token"
+        },
+        body: json.encode(body),
+      );
+      return response;
+    } catch (err) {
+      return null;
+    }
   }
 
   Future<http.StreamedResponse> patchImage(String url, String filepath) async {
     url = formater(url);
     String token = await storage.read(key: "token");
-    var request = http.MultipartRequest('PATCH', Uri.parse(url));
-    request.files.add(await http.MultipartFile.fromPath("img", filepath));
-    request.headers.addAll({
-      "Content-type": "multipart/form-data",
-      "Authorization": "Bearer $token"
-    });
-    var response = request.send();
-    return response;
+    try {
+      var request = http.MultipartRequest('PATCH', Uri.parse(url));
+      request.files.add(await http.MultipartFile.fromPath("img", filepath));
+      request.headers.addAll({
+        "Content-type": "multipart/form-data",
+        "Authorization": "Bearer $token"
+      });
+      var response = request.send();
+      return response;
+    } catch (err) {
+      return null;
+    }
   }
 
   String formater(String url) {

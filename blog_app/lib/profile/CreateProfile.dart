@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -18,15 +18,15 @@ class CreateProfile extends StatefulWidget {
 class _CreateProfileState extends State<CreateProfile> {
   @override
   void initState() {
-    getImageFileFromAssets();
+    getImageFileFromAssets("profile.jpeg");
     super.initState();
   }
 
-  Future<void> getImageFileFromAssets() async {
-    // final byteData = await rootBundle.load("assets/profile.jpeg");
-    final file = File('${(await getTemporaryDirectory()).path}/profile.jpeg');
-    // await file.writeAsBytes(byteData.buffer
-    //     .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+  Future<void> getImageFileFromAssets(String path) async {
+    final byteData = await rootBundle.load("assets/$path");
+    final file = File('${(await getTemporaryDirectory()).path}/$path');
+    await file.writeAsBytes(byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
     setState(() {
       _imageFile = PickedFile(file.path);
     });

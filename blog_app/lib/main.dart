@@ -1,3 +1,4 @@
+import 'package:blog_app/pages/LoadingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Widget page = WelcomePage();
+  Widget page = LoadingPage();
   final storage = FlutterSecureStorage();
   @override
   void initState() {

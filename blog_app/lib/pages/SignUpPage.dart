@@ -105,9 +105,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       //   setState(() {
                       //     circular = false;
                       //   });
-                      // } 
-                      if (_globalkey.currentState.validate() &&
-                          validate) {
+                      // }
+                      if (_globalkey.currentState.validate() && validate) {
                         // we send data to rest api server
                         Map<String, String> data = {
                           "username": _usernameController.text,
@@ -117,7 +116,23 @@ class _SignUpPageState extends State<SignUpPage> {
                         print(data);
                         var responseRegister =
                             await networkHandler.post("/user/register", data);
-                        if (responseRegister.statusCode == 200 ||
+                        if (responseRegister == null) {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Some eror occured. Please try later',
+                              ),
+                              duration: Duration(
+                                seconds: 2,
+                              ),
+                            ),
+                          );
+                          setState(() {
+                            validate = false;
+                            circular = false;
+                          });
+                        } else if (responseRegister.statusCode == 200 ||
                             responseRegister.statusCode == 201) {
                           Map<String, String> data = {
                             "username": _usernameController.text,
@@ -125,8 +140,23 @@ class _SignUpPageState extends State<SignUpPage> {
                           };
                           var response =
                               await networkHandler.post("/user/login", data);
-
-                          if (response.statusCode == 200 ||
+                          if (response == null) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Some eror occured. Please try later',
+                                ),
+                                duration: Duration(
+                                  seconds: 2,
+                                ),
+                              ),
+                            );
+                            setState(() {
+                              validate = false;
+                              circular = false;
+                            });
+                          } else if (response.statusCode == 200 ||
                               response.statusCode == 201) {
                             Map<String, dynamic> output =
                                 json.decode(response.body);
@@ -142,9 +172,15 @@ class _SignUpPageState extends State<SignUpPage> {
                             Navigator.of(context).pushNamedAndRemoveUntil(
                                 HomePage.routeName, (route) => false);
                           } else {
-                            Scaffold.of(context).showSnackBar(
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text("Netwok Error"),
+                                content: Text(
+                                  'Netwok Error',
+                                ),
+                                duration: Duration(
+                                  seconds: 2,
+                                ),
                               ),
                             );
                           }
@@ -206,18 +242,26 @@ class _SignUpPageState extends State<SignUpPage> {
                 : null);
       });
     } else {
-      print("123");
       var response = await networkHandler
           .get("/user/checkusername/${_usernameController.text}");
       var response1 =
           await networkHandler.get("/user/checkemail/${_emailController.text}");
-      // if (response == null || response1 == null) {
-      //   setState(() {
-      //     // circular = false;
-      //     networkErr = true;
-      //   });
-      // } 
-      if (response["Status"] || response1["Status"]) {
+      if (response == null || response1 == null) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Some eror occured. Please try later',
+            ),
+            duration: Duration(
+              seconds: 2,
+            ),
+          ),
+        );
+        setState(() {
+          circular = false;
+        });
+      } else if (response["Status"] || response1["Status"]) {
         setState(() {
           // circular = false;
           // networkErr = false;

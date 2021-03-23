@@ -14,7 +14,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   NetworkHandler networkHandler = NetworkHandler();
   Widget page = Center(child: CircularProgressIndicator());
-  
+
   @override
   void initState() {
     // TODO: implement initState
@@ -23,8 +23,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void checkProfile() async {
+    setState(() {
+      page = Center(child: CircularProgressIndicator());
+    });
     var response = await networkHandler.get("/profile/checkProfile");
-    if (response["Status"] == true) {
+    if (response == null) {
+      setState(() {
+        page = networkError();
+      });
+    } else if (response["Status"] == true) {
       setState(() {
         page = MainProfile();
       });
@@ -42,8 +49,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget showProfile() {
-    return Center(child: Text("Profile Data is Avalable"));
+  Widget networkError() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Center(
+          child: Text(
+            "Network Error",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              // color: Colors.deepOrange,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.refresh_sharp),
+          onPressed: () {
+            checkProfile();
+          },
+        ),
+      ],
+    );
   }
 
   Widget button() {
@@ -66,8 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           InkWell(
             onTap: () {
-              Navigator.of(context)
-                  .pushNamed(CreateProfile.routeName);
+              Navigator.of(context).pushNamed(CreateProfile.routeName);
             },
             child: Container(
               height: 60,

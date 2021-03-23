@@ -141,7 +141,23 @@ class _SignInPageState extends State<SignInPage> {
                         };
                         var response =
                             await networkHandler.post("/user/login", data);
-                        if (response.statusCode == 200 ||
+                        if (response == null) {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Some eror occured. Please try later',
+                              ),
+                              duration: Duration(
+                                seconds: 2,
+                              ),
+                            ),
+                          );
+                          setState(() {
+                            validate = false;
+                            circular = false;
+                          });
+                        } else if (response.statusCode == 200 ||
                             response.statusCode == 201) {
                           Map<String, dynamic> output =
                               json.decode(response.body);
@@ -166,6 +182,8 @@ class _SignInPageState extends State<SignInPage> {
                         } else {
                           Map<String, dynamic> output =
                               json.decode(response.body);
+                          print("3");
+                          print(output);
                           setState(() {
                             validate = false;
                             // errorText = output["msg"];
