@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:blog_app/pages/WelcomePage.dart';
 import 'package:blog_app/screen/HomeScreen.dart';
 import 'package:blog_app/profile/ProfileScreen.dart';
 
@@ -11,6 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final storage = FlutterSecureStorage();
   int currentState = 0;
   List<Widget> widgets = [HomeScreen(), ProfileScreen()];
   List<String> titleString = ["Home Page", "Profile Page"];
@@ -75,7 +78,13 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               title: Text("Logout"),
               trailing: Icon(Icons.power_settings_new),
-              onTap: () {},
+              onTap: () async {
+                await storage.deleteAll();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  WelcomePage.routeName,
+                  (route) => false,
+                );
+              },
             ),
           ],
         ),

@@ -1,4 +1,3 @@
-import 'package:blog_app/pages/LoadingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +10,8 @@ import 'package:blog_app/screen/HomeScreen.dart';
 import 'package:blog_app/profile/ProfileScreen.dart';
 import 'package:blog_app/profile/CreateProfile.dart';
 import 'package:blog_app/profile/MainProfile.dart';
+import 'package:blog_app/pages/LoadingPage.dart';
+import 'package:blog_app/profile/EditProfile.dart';
 
 void main() {
   runApp(MyApp());
@@ -69,6 +70,9 @@ class _MyAppState extends State<MyApp> {
           ProfileScreen.routeName: (ctx) => ProfileScreen(),
           HomeScreen.routeName: (ctx) => HomeScreen(),
           CreateProfile.routeName: (ctx) => CreateProfile(),
+          EditProfile.routeName: (ctx) => EditProfile(
+                ModalRoute.of(ctx).settings.arguments,
+              ),
           MainProfile.routeName: (ctx) => MainProfile(),
         },
       ),

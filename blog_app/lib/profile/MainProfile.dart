@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:blog_app/models/ProfileModel.dart';
+import 'package:blog_app/profile/EditProfile.dart';
 import 'package:blog_app/NetworkHandler.dart';
 
 class MainProfile extends StatefulWidget {
@@ -12,6 +13,7 @@ class MainProfile extends StatefulWidget {
 
 class _MainProfileState extends State<MainProfile> {
   bool circular = true;
+  bool error = false;
   ProfileModel profileModel = ProfileModel();
   NetworkHandler networkHandler = NetworkHandler();
 
@@ -23,62 +25,103 @@ class _MainProfileState extends State<MainProfile> {
   }
 
   void fetchData() async {
-    var response = await networkHandler.get("/profile/getData");
     setState(() {
-      profileModel = ProfileModel.fromJson(response["data"]);
-      circular = false;
+      circular = true;
     });
+    var response = await networkHandler.get("/profile/getData");
+    if (response == null) {
+      setState(() {
+        error = true;
+        circular = false;
+      });
+    } else {
+      setState(() {
+        profileModel = ProfileModel.fromJson(response["data"]);
+        circular = false;
+        error = false;
+      });
+    }
+  }
+
+  Widget networkError() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Center(
+          child: Text(
+            "Network Error",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              // color: Colors.deepOrange,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.refresh_sharp),
+          onPressed: () {
+            fetchData();
+          },
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // backgroundColor: Color(0xffEEEEFF),
       child: circular
           ? Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                ListView(
-                  children: <Widget>[
-                    SizedBox(
-                      height: 30,
+          : (error
+              ? networkError()
+              : Stack(
+                  children: [
+                    ListView(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 30,
+                        ),
+                        head(),
+                        Divider(
+                          thickness: 0.8,
+                        ),
+                        otherDetails(
+                          "About",
+                          profileModel.about,
+                        ),
+                        otherDetails(
+                          "Name",
+                          profileModel.name,
+                        ),
+                        otherDetails(
+                          "Profession",
+                          profileModel.profession,
+                        ),
+                        otherDetails(
+                          "DOB",
+                          profileModel.dOB,
+                        ),
+                        Divider(
+                          thickness: 0.8,
+                        ),
+                      ],
                     ),
-                    head(),
-                    Divider(
-                      thickness: 0.8,
-                    ),
-                    otherDetails(
-                      "About",
-                      profileModel.about,
-                    ),
-                    otherDetails(
-                      "Name",
-                      profileModel.name,
-                    ),
-                    otherDetails(
-                      "Profession",
-                      profileModel.profession,
-                    ),
-                    otherDetails(
-                      "DOB",
-                      profileModel.dOB,
-                    ),
-                    Divider(
-                      thickness: 0.8,
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        padding: EdgeInsets.all(20),
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(
+                            EditProfile.routeName,
+                            arguments: profileModel,
+                          );
+                        },
+                        color: Colors.teal,
+                      ),
                     ),
                   ],
-                ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    padding: EdgeInsets.all(20),
-                    icon: Icon(Icons.edit),
-                    onPressed: () {},
-                    color: Colors.teal,
-                  ),
-                ),
-              ],
-            ),
+                )),
     );
   }
 
@@ -93,6 +136,9 @@ class _MainProfileState extends State<MainProfile> {
               radius: 75,
               backgroundImage: NetworkHandler().getImage(profileModel.img.url),
             ),
+          ),
+          SizedBox(
+            height: 10,
           ),
           Text(
             profileModel.username,

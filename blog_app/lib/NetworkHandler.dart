@@ -10,7 +10,7 @@ class NetworkHandler {
   // String baseurl =
   //     "http://192.168.0.104:5000"; // instead localhost add your ip address here
   String baseurl =
-      "https://82694aee58ff.ngrok.io"; // add your ngrok forwarding to connect to real device
+      "https://b48ec6bf3797.ngrok.io"; // add your ngrok forwarding to connect to real device
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
 
@@ -39,6 +39,26 @@ class NetworkHandler {
     log.d(body);
     try {
       var response = await http.post(
+        url,
+        headers: {
+          "Content-type": "application/json",
+          "Authorization": "Bearer $token"
+        },
+        body: json.encode(body),
+      );
+      return response;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  Future<http.Response> patch(String url, Map<String, String> body) async {
+    String token = await storage.read(key: "token");
+    url = formater(url);
+    print("patching");
+    log.d(body);
+    try {
+      var response = await http.patch(
         url,
         headers: {
           "Content-type": "application/json",

@@ -3,32 +3,33 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
-import 'package:blog_app/NetworkHandler.dart';
+import 'package:blog_app/models/ProfileModel.dart';
 import 'package:blog_app/pages/HomePage.dart';
+import 'package:blog_app/NetworkHandler.dart';
 
-class CreateProfile extends StatefulWidget {
-  static const routeName = '/create-profile';
+class EditProfile extends StatefulWidget {
+  static const routeName = '/edit-profile';
+  ProfileModel profileModel = ProfileModel();
+
+  EditProfile(
+    this.profileModel,
+  );
 
   @override
-  _CreateProfileState createState() => _CreateProfileState();
+  _EditProfileState createState() => _EditProfileState();
 }
 
-class _CreateProfileState extends State<CreateProfile> {
+class _EditProfileState extends State<EditProfile> {
   @override
   void initState() {
-    getImageFileFromAssets("profile.jpeg");
     super.initState();
-  }
-
-  Future<void> getImageFileFromAssets(String path) async {
-    final byteData = await rootBundle.load("assets/$path");
-    final file = File('${(await getTemporaryDirectory()).path}/$path');
-    await file.writeAsBytes(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    setState(() {
-      _imageFile = PickedFile(file.path);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _name.text = widget.profileModel.name;
+      _profession.text = widget.profileModel.profession;
+      _dob.text = widget.profileModel.dOB;
+      _title.text = widget.profileModel.titleline;
+      _about.text = widget.profileModel.about;
     });
   }
 
@@ -89,7 +90,7 @@ class _CreateProfileState extends State<CreateProfile> {
                     "about": _about.text,
                   };
                   var response =
-                      await networkHandler.post("/profile/add", data);
+                      await networkHandler.patch("/profile/update", data);
                   if (response == null) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -114,32 +115,49 @@ class _CreateProfileState extends State<CreateProfile> {
                         setState(() {
                           circular = false;
                         });
-                        Navigator.of(context).pushNamedAndRemoveUntil(
+                        Navigator.of(context).pushReplacementNamed(
                           HomePage.routeName,
-                          (route) => false,
                         );
+                      } else {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Image couldn\'t be updated',
+                            ),
+                            duration: Duration(
+                              seconds: 2,
+                            ),
+                          ),
+                        );
+                        setState(() {
+                          circular = false;
+                        });
                       }
                     } else {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Something went wrong',
-                          ),
-                          duration: Duration(
-                            seconds: 2,
-                          ),
-                        ),
-                      );
                       setState(() {
                         circular = false;
                       });
+                      Navigator.of(context).pushReplacementNamed(
+                        HomePage.routeName,
+                      );
                     }
+                  } else {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Something went wrong',
+                        ),
+                        duration: Duration(
+                          seconds: 2,
+                        ),
+                      ),
+                    );
+                    setState(() {
+                      circular = false;
+                    });
                   }
-                } else {
-                  setState(() {
-                    circular = false;
-                  });
                 }
               },
               child: Center(
@@ -154,7 +172,7 @@ class _CreateProfileState extends State<CreateProfile> {
                     child: circular
                         ? CircularProgressIndicator()
                         : Text(
-                            "Submit",
+                            "Save",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -177,7 +195,7 @@ class _CreateProfileState extends State<CreateProfile> {
         CircleAvatar(
           radius: 80.0,
           backgroundImage: _imageFile == null
-              ? AssetImage("assets/profile.jpeg")
+              ? NetworkImage(widget.profileModel.img.url)
               : FileImage(
                   File(_imageFile.path),
                 ),
