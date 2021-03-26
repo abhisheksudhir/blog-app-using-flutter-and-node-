@@ -10,11 +10,35 @@ const User = require("../models/user.model");
 
 router.get("/getUserBlogs", middleware.checkToken, async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id, {
-      fields: { blogs: 1 },
-    }).populate("blogs");
-    // const profile = await Profile.findOne({ username: req.user.username });
-    res.status(200).json({ data: user });
+    // const user = await User.findById(req.user.id, {
+    //   fields: { blogs: 1 },
+    // }).populate("blogs");
+    const blogs = await BlogPost.find({
+      user: req.user.id,
+    });
+    res.status(200).json({ data: blogs });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.get("/getOtherBlogs", middleware.checkToken, async (req, res, next) => {
+  try {
+    const blogs = await BlogPost.find({
+      user: { $ne: req.user.id },
+    });
+    res.status(200).json({ data: blogs });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.get("/getAllBlogs", async (req, res, next) => {
+  try {
+    const blogs = await BlogPost.find({});
+    res.status(200).json({ data: blogs });
   } catch (err) {
     res.status(500).json({ msg: err.message });
     next(err);
@@ -91,5 +115,43 @@ router.patch(
     }
   }
 );
+
+router.delete("/delete/:id", middleware.checkToken, async (req, res, next) => {
+  try {
+    const blogexist = await BlogPost.findOne({ _id: req.params.id });
+    if (blogexist === null) {
+      throw new Error("Blog does not exist");
+    }
+    const old_public_id = blogexist.coverImage.public_id;
+    if (blogexist.user.toString() !== req.user.id) {
+      throw new Error("Not authorised to delete blog");
+    }
+    const blog = await BlogPost.findOneAndDelete({
+      username: req.params.username,
+    });
+    if (old_public_id != "") {
+      console.log("deleting image");
+      const del = await cloud.uploader.destroy(old_public_id);
+    }
+    await User.updateOne(
+      { _id: req.user.id },
+      { $pull: { blogs: req.params.id } }
+    );
+    // await campSchema.Partner.update(
+    //   { products: req.body.productId },
+    //   { $pull: { products: req.body.productId } }
+    // );
+    const msg = {
+      msg: "Blog successfully deleted",
+      id: blog._id,
+      title: blog.title,
+      body: blog.body,
+    };
+    res.status(200).json({ msg });
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+    next(err);
+  }
+});
 
 module.exports = router;
