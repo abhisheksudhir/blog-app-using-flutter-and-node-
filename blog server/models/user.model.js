@@ -18,6 +18,7 @@ const User = Schema({
     required: true,
     unique: true
   },
+  blogs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'BlogPost' }],
 });
 
 //below function takes place before password is saved so that we can encrypt the password

@@ -23,9 +23,11 @@ app.use(express.json());    //to parse json
 
 const userRoute = require("./routes/user");
 const profileRoute = require("./routes/profile");
+const blogRoute = require("./routes/blogpost");
 
 app.use("/user", userRoute);
 app.use("/profile", profileRoute);
+app.use("/blogPost", blogRoute);
 
 app.route("/").get((req, res) => res.json("your first rest api"));
 
