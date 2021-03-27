@@ -176,6 +176,7 @@ class _CreateProfileState extends State<CreateProfile> {
       child: Stack(children: <Widget>[
         CircleAvatar(
           radius: 80.0,
+          backgroundColor: Colors.white,
           backgroundImage: _imageFile == null
               ? AssetImage("assets/profile.jpeg")
               : FileImage(

@@ -14,6 +14,7 @@ router.get("/checkProfile", middleware.checkToken, async (req, res, next) => {
       return res.json({
         Status: true,
         username: req.user.username,
+        img: profile.img.url,
       });
     } else
       return res.json({

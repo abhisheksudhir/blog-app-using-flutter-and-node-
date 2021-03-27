@@ -134,7 +134,19 @@ class _MainProfileState extends State<MainProfile> {
           Center(
             child: CircleAvatar(
               radius: 75,
-              backgroundImage: NetworkHandler().getImage(profileModel.img.url),
+              backgroundColor: Colors.white,
+              // backgroundImage: NetworkHandler().getImage(profileModel.img.url),
+              backgroundImage: NetworkImage(
+                profileModel.img.url,
+              ),
+              // child: ClipOval(
+              //   child: profileModel.img.url == null
+              //       ? CircularProgressIndicator()
+              //       : Image.network(
+              //           profileModel.img.url,
+              //           fit: BoxFit.cover,
+              //         ),
+              // ),
             ),
           ),
           SizedBox(

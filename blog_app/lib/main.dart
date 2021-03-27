@@ -12,6 +12,7 @@ import 'package:blog_app/profile/CreateProfile.dart';
 import 'package:blog_app/profile/MainProfile.dart';
 import 'package:blog_app/pages/LoadingPage.dart';
 import 'package:blog_app/profile/EditProfile.dart';
+import 'package:blog_app/blog/addBlog.dart';
 
 void main() {
   runApp(MyApp());
@@ -74,6 +75,7 @@ class _MyAppState extends State<MyApp> {
                 ModalRoute.of(ctx).settings.arguments,
               ),
           MainProfile.routeName: (ctx) => MainProfile(),
+          AddBlog.routeName: (ctx) => AddBlog(),
         },
       ),
     );

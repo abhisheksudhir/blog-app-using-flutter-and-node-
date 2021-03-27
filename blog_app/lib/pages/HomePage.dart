@@ -1,9 +1,11 @@
+import 'package:blog_app/NetworkHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:blog_app/pages/WelcomePage.dart';
 import 'package:blog_app/screen/HomeScreen.dart';
 import 'package:blog_app/profile/ProfileScreen.dart';
+import 'package:blog_app/blog/addBlog.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home';
@@ -17,6 +19,38 @@ class _HomePageState extends State<HomePage> {
   int currentState = 0;
   List<Widget> widgets = [HomeScreen(), ProfileScreen()];
   List<String> titleString = ["Home Page", "Profile Page"];
+  String username = "";
+  NetworkHandler networkHandler = NetworkHandler();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkProfile();
+  }
+
+  void checkProfile() async {
+    var response = await networkHandler.get("/profile/checkProfile");
+    if (response == null) {
+      setState(() {
+        username = "";
+      });
+    } else if (response["Status"] == true) {
+      setState(() {
+        username = response['username'];
+        profilePhoto = CircleAvatar(
+          radius: 50,
+          backgroundImage: NetworkImage(
+            response['img'],
+          ),
+        );
+      });
+    } else {
+      setState(() {
+        username = response['username'];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,18 +74,11 @@ class _HomePageState extends State<HomePage> {
             DrawerHeader(
               child: Column(
                 children: <Widget>[
-                  Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ),
+                  profilePhoto,
                   SizedBox(
                     height: 10,
                   ),
-                  Text("@username"),
+                  Text("@$username"),
                 ],
               ),
             ),
@@ -93,7 +120,9 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.teal,
         onPressed: () {
-          null;
+          Navigator.of(context).pushNamed(
+            AddBlog.routeName,
+          );
         },
         child: Text(
           "+",
@@ -139,4 +168,13 @@ class _HomePageState extends State<HomePage> {
       body: widgets[currentState],
     );
   }
+
+  Widget profilePhoto = Container(
+    height: 100,
+    width: 100,
+    decoration: BoxDecoration(
+      color: Colors.black,
+      borderRadius: BorderRadius.circular(50),
+    ),
+  );
 }

@@ -194,6 +194,7 @@ class _EditProfileState extends State<EditProfile> {
       child: Stack(children: <Widget>[
         CircleAvatar(
           radius: 80.0,
+          backgroundColor: Colors.white,
           backgroundImage: _imageFile == null
               ? NetworkImage(widget.profileModel.img.url)
               : FileImage(
