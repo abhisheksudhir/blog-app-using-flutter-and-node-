@@ -310,6 +310,39 @@ router.delete(
 );
 
 //likes and dislikes
+router.get(
+  "/:id/likeDislikeStatus",
+  middleware.checkToken,
+  async (req, res, next) => {
+    try {
+      // const user = await User.findById(req.user.id, {
+      //   fields: { blogs: 1 },
+      // }).populate("blogs");
+      const blogexist = await BlogPost.findOne({ _id: req.params.id });
+      if (blogexist === null) {
+        throw new Error("Blog does not exist");
+      }
+      if (
+        blogexist.likedUsers.filter((user) => user.toString() === req.user.id)
+          .length > 0
+      ) {
+        res.status(200).json({ Status: "liked" });
+      } else if (
+        blogexist.dislikedUsers.filter(
+          (user) => user.toString() === req.user.id
+        ).length > 0
+      ) {
+        res.status(200).json({ Status: "disliked" });
+      } else {
+        res.status(200).json({ Status: null });
+      }
+    } catch (err) {
+      res.status(500).json({ msg: err.message });
+      next(err);
+    }
+  }
+);
+
 router.patch("/:id/like", middleware.checkToken, async (req, res, next) => {
   try {
     const blogexist = await BlogPost.findOne({ _id: req.params.id });
