@@ -1,3 +1,4 @@
+import 'package:blog_app/screen/BlogScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +14,7 @@ import 'package:blog_app/profile/MainProfile.dart';
 import 'package:blog_app/pages/LoadingPage.dart';
 import 'package:blog_app/profile/EditProfile.dart';
 import 'package:blog_app/blog/addBlog.dart';
+import 'package:blog_app/screen/UserBlogScreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -77,6 +79,8 @@ class _MyAppState extends State<MyApp> {
               ),
           MainProfile.routeName: (ctx) => MainProfile(),
           AddBlog.routeName: (ctx) => AddBlog(),
+          UserBlogScreen.routeName: (ctx) => UserBlogScreen(),
+          BlogScreen.routeName: (ctx) => BlogScreen(),
         },
       ),
     );

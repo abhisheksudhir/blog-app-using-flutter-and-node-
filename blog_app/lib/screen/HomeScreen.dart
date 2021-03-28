@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:blog_app/blog/Blogs.dart';
+
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home-screen';
 
@@ -11,8 +13,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text("Home Page"),
+      body: Blogs(
+        url: "/blogPost/getOtherBlogs",
       ),
     );
   }

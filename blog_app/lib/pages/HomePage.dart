@@ -1,14 +1,15 @@
 import 'dart:convert';
 
-import 'package:blog_app/NetworkHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/models/ProfileModel.dart';
+import 'package:blog_app/blog/addBlog.dart';
 import 'package:blog_app/pages/WelcomePage.dart';
 import 'package:blog_app/screen/HomeScreen.dart';
 import 'package:blog_app/profile/ProfileScreen.dart';
-import 'package:blog_app/blog/addBlog.dart';
+import 'package:blog_app/screen/UserBlogScreen.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home';
@@ -122,7 +123,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () {},
             ),
             ListTile(
-              title: Text("New Story"),
+              title: Text("New Blog"),
               trailing: Icon(Icons.add),
               onTap: () {},
             ),
@@ -132,9 +133,13 @@ class _HomePageState extends State<HomePage> {
               onTap: () {},
             ),
             ListTile(
-              title: Text("Feedback"),
-              trailing: Icon(Icons.feedback),
-              onTap: () {},
+              title: Text("My Blogs"),
+              trailing: Icon(Icons.book),
+              onTap: () {
+                Navigator.of(context).pushNamed(
+                  UserBlogScreen.routeName,
+                );
+              },
             ),
             ListTile(
               title: Text("Logout"),

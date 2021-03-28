@@ -10,7 +10,7 @@ class NetworkHandler {
   // String baseurl =
   //     "http://192.168.0.104:5000"; // instead localhost add your ip address here
   String baseurl =
-      "https://71c5bb64ca02.ngrok.io"; // add your ngrok forwarding to connect to real device
+      "https://0394fb104848.ngrok.io"; // add your ngrok forwarding to connect to real device
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
 
