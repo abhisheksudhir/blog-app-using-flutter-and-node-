@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:blog_app/models/ProfileModel.dart';
@@ -21,6 +23,8 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+  final storage = FlutterSecureStorage();
+
   @override
   void initState() {
     super.initState();
@@ -76,54 +80,109 @@ class _EditProfileState extends State<EditProfile> {
             SizedBox(
               height: 20,
             ),
-            InkWell(
-              onTap: () async {
-                setState(() {
-                  circular = true;
-                });
-                if (_globalkey.currentState.validate()) {
-                  Map<String, String> data = {
-                    "name": _name.text,
-                    "profession": _profession.text,
-                    "DOB": _dob.text,
-                    "titleline": _title.text,
-                    "about": _about.text,
-                  };
-                  var response =
-                      await networkHandler.patch("/profile/update", data);
-                  if (response == null) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Network Error. Please try later',
-                        ),
-                        duration: Duration(
-                          seconds: 2,
-                        ),
-                      ),
-                    );
+            Center(
+              child: Container(
+                width: 200,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: InkWell(
+                  onTap: () async {
                     setState(() {
-                      circular = false;
+                      circular = true;
                     });
-                  } else if (response.statusCode == 200 ||
-                      response.statusCode == 201) {
-                    if (_imageFile != null) {
-                      var imageResponse = await networkHandler.patchImage(
-                          "/profile/add/image", _imageFile.path);
-                      if (imageResponse.statusCode == 200) {
+                    if (_globalkey.currentState.validate()) {
+                      Map<String, String> data = {
+                        "name": _name.text,
+                        "profession": _profession.text,
+                        "DOB": _dob.text,
+                        "titleline": _title.text,
+                        "about": _about.text,
+                      };
+                      var response =
+                          await networkHandler.patch("/profile/update", data);
+                      if (response == null) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Network Error. Please try later',
+                            ),
+                            duration: Duration(
+                              seconds: 2,
+                            ),
+                          ),
+                        );
                         setState(() {
                           circular = false;
                         });
-                        Navigator.of(context).pushReplacementNamed(
-                          HomePage.routeName,
+                      } else if (response.statusCode == 200 ||
+                          response.statusCode == 201) {
+                        // print("start");
+                        // print(response.body);
+                        // print("end");
+                        await storage.write(
+                          key: "profile",
+                          value: json.encode(
+                            ProfileModel.fromJson(
+                              json.decode(
+                                response.body,
+                              )["data"],
+                            ),
+                          ),
                         );
+                        if (_imageFile != null) {
+                          var imageResponse = await networkHandler.patchImage(
+                              "/profile/add/image", _imageFile.path);
+                          if (imageResponse.statusCode == 200) {
+                            await storage.write(
+                          key: "profile",
+                          value: json.encode(
+                            ProfileModel.fromJson(
+                              json.decode(
+                                await imageResponse.stream.bytesToString(),
+                              )["data"],
+                            ),
+                          ),
+                        );
+                            setState(() {
+                              circular = false;
+                            });
+                            Navigator.of(context).pushReplacementNamed(
+                              HomePage.routeName,
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Image couldn\'t be updated',
+                                ),
+                                duration: Duration(
+                                  seconds: 2,
+                                ),
+                              ),
+                            );
+                            setState(() {
+                              circular = false;
+                            });
+                          }
+                        } else {
+                          setState(() {
+                            circular = false;
+                          });
+                          Navigator.of(context).pushReplacementNamed(
+                            HomePage.routeName,
+                          );
+                        }
                       } else {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Image couldn\'t be updated',
+                              'Something went wrong',
                             ),
                             duration: Duration(
                               seconds: 2,
@@ -134,40 +193,8 @@ class _EditProfileState extends State<EditProfile> {
                           circular = false;
                         });
                       }
-                    } else {
-                      setState(() {
-                        circular = false;
-                      });
-                      Navigator.of(context).pushReplacementNamed(
-                        HomePage.routeName,
-                      );
                     }
-                  } else {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Something went wrong',
-                        ),
-                        duration: Duration(
-                          seconds: 2,
-                        ),
-                      ),
-                    );
-                    setState(() {
-                      circular = false;
-                    });
-                  }
-                }
-              },
-              child: Center(
-                child: Container(
-                  width: 200,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  },
                   child: Center(
                     child: circular
                         ? CircularProgressIndicator()
@@ -411,7 +438,7 @@ class _EditProfileState extends State<EditProfile> {
         if (value.isEmpty) return "About can't be empty";
         return null;
       },
-      maxLines: 4,
+      maxLines: null,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderSide: BorderSide(

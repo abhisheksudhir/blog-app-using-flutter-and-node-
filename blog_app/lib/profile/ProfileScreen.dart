@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/profile/CreateProfile.dart';
@@ -13,33 +14,50 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   NetworkHandler networkHandler = NetworkHandler();
+  final storage = FlutterSecureStorage();
   Widget page = Center(child: CircularProgressIndicator());
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _read();
     checkProfile();
   }
 
   void checkProfile() async {
-    setState(() {
-      page = Center(child: CircularProgressIndicator());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data = await _read();
+      if (data == null) {
+        setState(() {
+          page = Center(child: CircularProgressIndicator());
+        });
+        var response = await networkHandler.get("/profile/checkProfile");
+        if (response == null) {
+          setState(() {
+            page = networkError();
+          });
+        } else if (response["Status"] == true) {
+          setState(() {
+            page = MainProfile();
+          });
+        } else {
+          setState(() {
+            page = button();
+          });
+        }
+      } else {
+        setState(() {
+          page = MainProfile();
+        });
+      }
     });
-    var response = await networkHandler.get("/profile/checkProfile");
-    if (response == null) {
-      setState(() {
-        page = networkError();
-      });
-    } else if (response["Status"] == true) {
-      setState(() {
-        page = MainProfile();
-      });
-    } else {
-      setState(() {
-        page = button();
-      });
-    }
+  }
+
+  dynamic _read() async {
+    // await storage.delete(key: "profile");
+    String profile = await storage.read(key: "profile");
+    return profile;
   }
 
   @override

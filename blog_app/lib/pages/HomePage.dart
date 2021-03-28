@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:blog_app/NetworkHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:blog_app/models/ProfileModel.dart';
 import 'package:blog_app/pages/WelcomePage.dart';
 import 'package:blog_app/screen/HomeScreen.dart';
 import 'package:blog_app/profile/ProfileScreen.dart';
@@ -26,18 +29,43 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    checkProfile();
+    _read("profile");
+    _read("username");
+    getProfile();
+  }
+
+  void getProfile() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data1 = await _read("profile");
+      final data2 = await _read("username");
+      if (data1 != null) {
+        setState(() {
+          username = data2;
+          profilePhoto = CircleAvatar(
+            radius: 50,
+            backgroundImage: NetworkImage(
+              ProfileModel.fromJson(
+                json.decode(data1),
+              ).img.url,
+            ),
+          );
+        });
+      } else {
+        checkProfile();
+      }
+    });
   }
 
   void checkProfile() async {
+    final data2 = await _read("username");
     var response = await networkHandler.get("/profile/checkProfile");
     if (response == null) {
       setState(() {
-        username = "";
+        username = data2;
       });
     } else if (response["Status"] == true) {
       setState(() {
-        username = response['username'];
+        username = data2;
         profilePhoto = CircleAvatar(
           radius: 50,
           backgroundImage: NetworkImage(
@@ -47,9 +75,15 @@ class _HomePageState extends State<HomePage> {
       });
     } else {
       setState(() {
-        username = response['username'];
+        username = data2;
       });
     }
+  }
+
+  dynamic _read(String key1) async {
+    // await storage.delete(key: "profile");
+    String profile = await storage.read(key: key1);
+    return profile;
   }
 
   @override

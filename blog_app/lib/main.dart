@@ -34,6 +34,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void checkLogin() async {
+    await storage.delete(key: "profile");
     String token = await storage.read(key: "token");
     if (token != null) {
       setState(() {

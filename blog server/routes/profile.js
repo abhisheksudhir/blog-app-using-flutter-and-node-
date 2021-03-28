@@ -102,11 +102,11 @@ router.patch(
           },
           { new: true }
         );
-        const msg = {
-          msg: "image updated successfully",
-          data: profile.toJSON(),
-        };
-        res.status(200).json({ msg });
+        // const msg = {
+        //   msg: "image updated successfully",
+        //   data: profile.toJSON(),
+        // };
+        res.status(200).json({ data: profile });
       } else {
         throw new Error("File not added");
       }

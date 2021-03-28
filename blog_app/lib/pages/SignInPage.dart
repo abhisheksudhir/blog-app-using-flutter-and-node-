@@ -167,6 +167,10 @@ class _SignInPageState extends State<SignInPage> {
                             key: "token",
                             value: output["token"],
                           );
+                          await storage.write(
+                            key: "username",
+                            value: data["username"],
+                          );
                           setState(() {
                             validate = true;
                             circular = false;

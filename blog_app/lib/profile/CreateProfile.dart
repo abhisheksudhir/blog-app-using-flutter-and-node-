@@ -75,81 +75,81 @@ class _CreateProfileState extends State<CreateProfile> {
             SizedBox(
               height: 20,
             ),
-            InkWell(
-              onTap: () async {
-                setState(() {
-                  circular = true;
-                });
-                if (_globalkey.currentState.validate()) {
-                  Map<String, String> data = {
-                    "name": _name.text,
-                    "profession": _profession.text,
-                    "DOB": _dob.text,
-                    "titleline": _title.text,
-                    "about": _about.text,
-                  };
-                  var response =
-                      await networkHandler.post("/profile/add", data);
-                  if (response == null) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Network Error. Please try later',
-                        ),
-                        duration: Duration(
-                          seconds: 2,
-                        ),
-                      ),
-                    );
+            Center(
+              child: Container(
+                width: 200,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: InkWell(
+                  onTap: () async {
                     setState(() {
-                      circular = false;
+                      circular = true;
                     });
-                  } else if (response.statusCode == 200 ||
-                      response.statusCode == 201) {
-                    if (_imageFile != null) {
-                      var imageResponse = await networkHandler.patchImage(
-                          "/profile/add/image", _imageFile.path);
-                      if (imageResponse.statusCode == 200) {
+                    if (_globalkey.currentState.validate()) {
+                      Map<String, String> data = {
+                        "name": _name.text,
+                        "profession": _profession.text,
+                        "DOB": _dob.text,
+                        "titleline": _title.text,
+                        "about": _about.text,
+                      };
+                      var response =
+                          await networkHandler.post("/profile/add", data);
+                      if (response == null) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Network Error. Please try later',
+                            ),
+                            duration: Duration(
+                              seconds: 2,
+                            ),
+                          ),
+                        );
                         setState(() {
                           circular = false;
                         });
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          HomePage.routeName,
-                          (route) => false,
-                        );
+                      } else if (response.statusCode == 200 ||
+                          response.statusCode == 201) {
+                        if (_imageFile != null) {
+                          var imageResponse = await networkHandler.patchImage(
+                              "/profile/add/image", _imageFile.path);
+                          if (imageResponse.statusCode == 200) {
+                            setState(() {
+                              circular = false;
+                            });
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              HomePage.routeName,
+                              (route) => false,
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Something went wrong',
+                              ),
+                              duration: Duration(
+                                seconds: 2,
+                              ),
+                            ),
+                          );
+                          setState(() {
+                            circular = false;
+                          });
+                        }
                       }
                     } else {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Something went wrong',
-                          ),
-                          duration: Duration(
-                            seconds: 2,
-                          ),
-                        ),
-                      );
                       setState(() {
                         circular = false;
                       });
                     }
-                  }
-                } else {
-                  setState(() {
-                    circular = false;
-                  });
-                }
-              },
-              child: Center(
-                child: Container(
-                  width: 200,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  },
                   child: Center(
                     child: circular
                         ? CircularProgressIndicator()
@@ -393,7 +393,7 @@ class _CreateProfileState extends State<CreateProfile> {
         if (value.isEmpty) return "About can't be empty";
         return null;
       },
-      maxLines: 4,
+      maxLines: null,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderSide: BorderSide(

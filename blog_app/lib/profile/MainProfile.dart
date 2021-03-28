@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:blog_app/models/ProfileModel.dart';
 import 'package:blog_app/profile/EditProfile.dart';
@@ -16,12 +19,32 @@ class _MainProfileState extends State<MainProfile> {
   bool error = false;
   ProfileModel profileModel = ProfileModel();
   NetworkHandler networkHandler = NetworkHandler();
+  final storage = FlutterSecureStorage();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchData();
+    _read();
+    getData();
+  }
+
+  void getData() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data = await _read();
+      if (data == null) {
+        fetchData();
+      } else {
+        setState(() {
+          profileModel = ProfileModel.fromJson(
+            json.decode(data),
+          );
+          circular = false;
+          error = false;
+          // print()
+        });
+      }
+    });
   }
 
   void fetchData() async {
@@ -36,11 +59,28 @@ class _MainProfileState extends State<MainProfile> {
       });
     } else {
       setState(() {
-        profileModel = ProfileModel.fromJson(response["data"]);
+        profileModel = ProfileModel.fromJson(
+          response["data"],
+        );
         circular = false;
         error = false;
+        // print()
       });
+      _write();
     }
+  }
+
+  dynamic _write() async {
+    await storage.write(
+      key: "profile",
+      value: json.encode(profileModel),
+    );
+  }
+
+  dynamic _read() async {
+    // await storage.delete(key: "profile");
+    String profile = await storage.read(key: "profile");
+    return profile;
   }
 
   Widget networkError() {
@@ -79,7 +119,7 @@ class _MainProfileState extends State<MainProfile> {
                     ListView(
                       children: <Widget>[
                         SizedBox(
-                          height: 30,
+                          height: 10,
                         ),
                         head(),
                         Divider(
@@ -106,16 +146,27 @@ class _MainProfileState extends State<MainProfile> {
                         ),
                       ],
                     ),
+                    // Align(
+                    //   alignment: Alignment.topRight,
+                    //   child: IconButton(
+                    //     padding: EdgeInsets.all(20),
+                    //     icon: Icon(Icons.edit),
+                    //     onPressed: () {
+                    //       Navigator.of(context).pushNamed(
+                    //         EditProfile.routeName,
+                    //         arguments: profileModel,
+                    //       );
+                    //     },
+                    //     color: Colors.teal,
+                    //   ),
+                    // ),
                     Align(
-                      alignment: Alignment.topRight,
+                      alignment: Alignment.bottomRight,
                       child: IconButton(
                         padding: EdgeInsets.all(20),
-                        icon: Icon(Icons.edit),
+                        icon: Icon(Icons.refresh),
                         onPressed: () {
-                          Navigator.of(context).pushNamed(
-                            EditProfile.routeName,
-                            arguments: profileModel,
-                          );
+                          fetchData();
                         },
                         color: Colors.teal,
                       ),
@@ -126,44 +177,62 @@ class _MainProfileState extends State<MainProfile> {
   }
 
   Widget head() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Center(
-            child: CircleAvatar(
-              radius: 75,
-              backgroundColor: Colors.white,
-              // backgroundImage: NetworkHandler().getImage(profileModel.img.url),
-              backgroundImage: NetworkImage(
-                profileModel.img.url,
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Center(
+                child: CircleAvatar(
+                  radius: 75,
+                  backgroundColor: Colors.white,
+                  // backgroundImage: NetworkHandler().getImage(profileModel.img.url),
+                  backgroundImage: NetworkImage(
+                    profileModel.img.url,
+                  ),
+                  // child: ClipOval(
+                  //   child: profileModel.img.url == null
+                  //       ? CircularProgressIndicator()
+                  //       : Image.network(
+                  //           profileModel.img.url,
+                  //           fit: BoxFit.cover,
+                  //         ),
+                  // ),
+                ),
               ),
-              // child: ClipOval(
-              //   child: profileModel.img.url == null
-              //       ? CircularProgressIndicator()
-              //       : Image.network(
-              //           profileModel.img.url,
-              //           fit: BoxFit.cover,
-              //         ),
-              // ),
-            ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                profileModel.username,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                profileModel.titleline,
+              )
+            ],
           ),
-          SizedBox(
-            height: 10,
+        ),
+        Positioned(
+          right: 5,
+          child: IconButton(
+            // padding: EdgeInsets.all(10),
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              Navigator.of(context).pushNamed(
+                EditProfile.routeName,
+                arguments: profileModel,
+              );
+            },
+            color: Colors.teal,
           ),
-          Text(
-            profileModel.username,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Text(
-            profileModel.titleline,
-          )
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -185,7 +254,9 @@ class _MainProfileState extends State<MainProfile> {
           ),
           Text(
             value,
-            style: TextStyle(fontSize: 15),
+            style: TextStyle(
+              fontSize: 15,
+            ),
           )
         ],
       ),
