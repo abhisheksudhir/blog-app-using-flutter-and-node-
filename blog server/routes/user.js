@@ -3,6 +3,7 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const middleware = require("../middlewares/auth");
 const router = express.Router();
+const sendEmail = require("../email");
 
 // router.post("/register", (req, res) => {
 //   const { username, password, email } = req.body;
@@ -67,10 +68,12 @@ router.get("/checkemail/:email", async (req, res, next) => {
     if (user !== null) {
       return res.json({
         Status: true,
+        username: user.username,
       });
     } else
       return res.json({
         Status: false,
+        username: null,
       });
   } catch (err) {
     res.status(500).json({ msg: err.message });
@@ -137,15 +140,21 @@ router.patch(
       if (userexist._id.toString() !== req.user.id) {
         throw new Error("Not authorised to update username");
       }
-      const user = await User.findOneAndUpdate(
-        { username: req.params.username },
-        { $set: { password: req.body.password } }
-      );
+      // const user = await User.findOneAndUpdate(
+      //   { username: req.params.username },
+      //   { $set: { password: req.body.password } },
+      //   { new: true }
+      // );
+      const user = await User.findOne({ username: req.params.username });
+      console.log(user);
+      user.password = req.body.password;
+      await user.save();
       const msg = {
         msg: "password successfully updated",
         id: user._id,
         username: user.username,
         email: user.email,
+        // password: user.password,
       };
       res.status(200).json({ msg });
     } catch (err) {
@@ -184,8 +193,161 @@ router.delete(
   }
 );
 
-// router.use(function (err, req, res, next) {
-//   res.status(500).json(err.message);
-// });
+router.post("/getVerificationMail", async (req, res, next) => {
+  try {
+    const { username, password, email } = req.body;
+    const userexist = await User.findOne({
+      email: email,
+    });
+    if (userexist !== null) {
+      throw new Error("Email already taken");
+    }
+    const token = jwt.sign({ username, password, email }, process.env.SECRET, {
+      expiresIn: "30m",
+    });
+    const mailObj = {
+      from: "abhisheksudhir2000@gmail.com",
+      recipients: [email],
+      subject: "Account verification",
+      html: `
+      <h2>Please click on link to activate account(active for only 30 minutes)</h2>
+      <br />
+      <a href="${process.env.SERVER_URL}/user/activateAccount/${token}">
+      Activate Account
+      </a>
+      <br />
+      <h3>If it doesn't work, please try copy paste the below link in your browser</h3>
+      <br />
+      <a href="${process.env.CLIENT_URL}/user/activateAccount/${token}">
+      ${process.env.CLIENT_URL}/user/activateAccount/${token}
+      </a>
+      `,
+    };
+    // sendEmail(mailObj).then((res) => {
+    //   console.log(res);
+    // });
+    const message = await sendEmail(mailObj);
+
+    res.status(201).json({ msg: message });
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.get("/activateAccount/:token", async (req, res, next) => {
+  try {
+    const token = req.params.token;
+    if (token) {
+      const decoded = await jwt.verify(token, process.env.SECRET);
+      const { iat, exp, ...body } = decoded;
+      const user = await User.create(body);
+      const { id, username, email } = user;
+      res.status(201).json({ id, username, email });
+    } else {
+      throw Error("Something went wrong");
+    }
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.post("/forgotPassword", async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    const userexist = await User.findOne({
+      email: email,
+    });
+    if (userexist === null) {
+      throw new Error("Email doesn't exist");
+    }
+    const num = Math.floor(100000 + Math.random() * 900000);
+    const token = jwt.sign({ num }, process.env.SECRET, {
+      expiresIn: "5m",
+    });
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      { $set: { otp: token } },
+      { new: true }
+    );
+    const { password, otp, blogs, ...userdetails } = user.toJSON();
+    const mailObj = {
+      from: "abhisheksudhir2000@gmail.com",
+      recipients: [email],
+      subject: `Request for password change for username: ${userdetails.username}`,
+      html: `
+      <h2>OTP for changing password</h2>
+      <br />
+      <p>Below is the otp for changing your account password. It is valid for only 5 minutes</p>
+      <h5>${num}</h5>
+      `,
+    };
+    // sendEmail(mailObj).then((res) => {
+    //   console.log(res);
+    // });
+    const message = await sendEmail(mailObj);
+
+    res.status(201).json({ msg: message, user: userdetails });
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.post("/getOtp/:id", async (req, res, next) => {
+  try {
+    const otp = req.body.otp;
+    const userexist = await User.findById({
+      _id: req.params.id,
+    });
+    if (userexist === null) {
+      throw new Error("Email doesn't exist");
+    }
+    const decoded = await jwt.verify(userexist.otp, process.env.SECRET);
+
+    // console.log(decoded);
+
+    if (otp.toString() !== decoded.num.toString()) {
+      throw new Error("Incorrect otp");
+    }
+
+    const message = "Correct otp";
+
+    res.status(201).json({ msg: message, token: userexist.otp });
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.patch(
+  "/update/:id/:token",
+  middleware.checkToken,
+  async (req, res, next) => {
+    try {
+      const user = await User.findById({ _id: req.params.id });
+      if (user === null) {
+        throw new Error("User does not exist");
+      }
+      await jwt.verify(user.otp, process.env.SECRET);
+      user.password = req.body.password;
+      user.otp = null;
+      await user.save();
+      const msg = {
+        msg: "password successfully updated",
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        otp: user.otp,
+        // password: user.password,
+      };
+      res.status(200).json({ msg });
+    } catch (err) {
+      res.status(403).json({ msg: err.message });
+      next(err);
+    }
+  }
+);
 
 module.exports = router;

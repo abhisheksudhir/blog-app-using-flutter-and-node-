@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 require("dotenv").config(); //to create private variables
 const port = process.env.PORT || 5000;
 const app = express();
@@ -20,6 +21,7 @@ connection.once("open", () => {
 app.use("/uploads", express.static("uploads")); //to make this folder accessible to browser
 
 app.use(express.json());    //to parse json
+app.use(cors());
 
 const userRoute = require("./routes/user");
 const profileRoute = require("./routes/profile");
