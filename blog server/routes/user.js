@@ -203,23 +203,22 @@ router.post("/getVerificationMail", async (req, res, next) => {
       throw new Error("Email already taken");
     }
     const token = jwt.sign({ username, password, email }, process.env.SECRET, {
-      expiresIn: "30m",
+      expiresIn: "10m",
     });
     const mailObj = {
       from: "abhisheksudhir2000@gmail.com",
       recipients: [email],
       subject: "Account verification",
       html: `
-      <h2>Please click on link to activate account(active for only 30 minutes)</h2>
-      <br />
+      <h2>Please click on link to activate account(active for only 10 minutes)</h2>
+      <h3>
+        <a href="${process.env.SERVER_URL}/user/activateAccount/${token}">
+        Activate Account
+        </a>
+      </h3>
+      <h3>If it doesn't work, please copy paste the below link in your browser</h3>
       <a href="${process.env.SERVER_URL}/user/activateAccount/${token}">
-      Activate Account
-      </a>
-      <br />
-      <h3>If it doesn't work, please try copy paste the below link in your browser</h3>
-      <br />
-      <a href="${process.env.CLIENT_URL}/user/activateAccount/${token}">
-      ${process.env.CLIENT_URL}/user/activateAccount/${token}
+      ${process.env.SERVER_URL}/user/activateAccount/${token}
       </a>
       `,
     };
@@ -241,6 +240,74 @@ router.get("/activateAccount/:token", async (req, res, next) => {
     if (token) {
       const decoded = await jwt.verify(token, process.env.SECRET);
       const { iat, exp, ...body } = decoded;
+      const userexist = await User.findOne({
+        email: decoded.email,
+      });
+      if (userexist !== null) {
+        throw new Error("Verification already done");
+      }
+      const user = await User.create(body);
+      const { id, username, email } = user;
+      res.status(201).json({ id, username, email });
+    } else {
+      throw Error("Something went wrong");
+    }
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.post("/getOtpVerificationMail", async (req, res, next) => {
+  try {
+    const { username, password, email } = req.body;
+    const userexist = await User.findOne({
+      email: email,
+    });
+    if (userexist !== null) {
+      throw new Error("Email already taken");
+    }
+    const num = Math.floor(100000 + Math.random() * 900000);
+    const token = jwt.sign({ username, password, email, num }, process.env.SECRET, {
+      expiresIn: "10m",
+    });
+    const mailObj = {
+      from: "abhisheksudhir2000@gmail.com",
+      recipients: [email],
+      subject: "Account verification",
+      html: `
+      <h2>OTP for verifying account</h2>
+      <p>Below is the otp for verifying your account password. It is valid for only 10 minutes</p>
+      <h2>${num}</h2>
+      `,
+    };
+    const message = await sendEmail(mailObj);
+    res.status(201).json({ msg: message, token: token });
+    // res.status(201).json({ msg: message });
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+    next(err);
+  }
+});
+
+router.post("/activateAccountByOtp/:token", async (req, res, next) => {
+  try {
+    const token = req.params.token;
+    if (token) {
+      const otp = req.body.otp;
+      const decoded = await jwt.verify(token, process.env.SECRET);
+      const { iat, exp, num, ...body } = decoded;
+      // console.log(typeof(otp));
+      // console.log(typeof(num));
+      if (otp.toString() !== num.toString()) {
+        throw new Error("Incorrect otp");
+      }
+      const userexist = await User.findOne({
+        email: decoded.email,
+      });
+      if (userexist !== null) {
+        throw new Error("Verification already done");
+      }
       const user = await User.create(body);
       const { id, username, email } = user;
       res.status(201).json({ id, username, email });
