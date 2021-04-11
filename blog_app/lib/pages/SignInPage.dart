@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/pages/SignUpPage.dart';
 import 'package:blog_app/pages/HomePage.dart';
+import 'package:blog_app/pages/ForgotPassword.dart';
 
 class SignInPage extends StatefulWidget {
   static const routeName = '/sign-in';
@@ -56,14 +57,15 @@ class _SignInPageState extends State<SignInPage> {
             ),
           ),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Form(
               key: _globalkey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Sign in with Email",
+                    "SIGN IN",
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -74,9 +76,9 @@ class _SignInPageState extends State<SignInPage> {
                     height: 20,
                   ),
                   usernameTextField(),
-                  SizedBox(
-                    height: 15,
-                  ),
+                  // SizedBox(
+                  //   height: 15,
+                  // ),
                   passwordTextField(),
                   SizedBox(
                     height: 20,
@@ -86,10 +88,11 @@ class _SignInPageState extends State<SignInPage> {
                     children: [
                       InkWell(
                         onTap: () {
-                          null;
+                          Navigator.of(context)
+                              .pushNamed(ForgotPassword.routeName);
                         },
                         child: Text(
-                          "Forgot Password ?",
+                          "Forgot Password?",
                           style: TextStyle(
                             color: Colors.blue,
                             fontSize: 15,
@@ -233,61 +236,128 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Widget usernameTextField() {
-    return Column(
-      children: [
-        Text("Username"),
-        TextFormField(
-          controller: _usernameController,
-          // focusNode: _usernameFocusNode,
-          textInputAction: TextInputAction.next,
-          // onFieldSubmitted: (_) {
-          //   FocusScope.of(context).requestFocus(_emailFocusNode);
-          // },
-          decoration: InputDecoration(
-            errorText: validate ? null : errorTextUser,
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.black,
-                width: 2,
-              ),
+    return Padding(
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        controller: _usernameController,
+        textInputAction: TextInputAction.next,
+        decoration: InputDecoration(
+          errorText: validate ? null : errorTextUser,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.teal,
             ),
           ),
-        )
-      ],
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.orange,
+              width: 2,
+            ),
+          ),
+          prefixIcon: Icon(
+            Icons.person_outline_sharp,
+            color: Colors.green,
+          ),
+          labelText: 'UserName',
+        ),
+      ),
     );
+
+    // return Column(
+    //   children: [
+    //     Text("Username"),
+    //     TextFormField(
+    //       controller: _usernameController,
+    //       // focusNode: _usernameFocusNode,
+    //       textInputAction: TextInputAction.next,
+    //       // onFieldSubmitted: (_) {
+    //       //   FocusScope.of(context).requestFocus(_emailFocusNode);
+    //       // },
+    //       decoration: InputDecoration(
+    //         errorText: validate ? null : errorTextUser,
+    //         focusedBorder: UnderlineInputBorder(
+    //           borderSide: BorderSide(
+    //             color: Colors.black,
+    //             width: 2,
+    //           ),
+    //         ),
+    //       ),
+    //     )
+    //   ],
+    // );
   }
 
   Widget passwordTextField() {
-    return Column(
-      children: [
-        Text("Password"),
-        TextFormField(
-          controller: _passwordController,
-          // focusNode: _passwordFocusNode,
-          obscureText: vis,
-          decoration: InputDecoration(
-            errorText: validate ? null : errorTextPass,
-            suffixIcon: IconButton(
-              icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
-              onPressed: () {
-                setState(() {
-                  vis = !vis;
-                });
-              },
-            ),
-            // helperText: "Password length should have >=8",
-            // helperStyle: TextStyle(
-            //   fontSize: 14,
-            // ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.black,
-                width: 2,
-              ),
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: TextFormField(
+        controller: _passwordController,
+        // focusNode: _passwordFocusNode,
+        obscureText: vis,
+        decoration: InputDecoration(
+          errorText: validate ? null : errorTextPass,
+          suffixIcon: IconButton(
+            icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
+            onPressed: () {
+              setState(() {
+                vis = !vis;
+              });
+            },
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.teal,
             ),
           ),
-        )
-      ],
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.orange,
+              width: 2,
+            ),
+          ),
+          prefixIcon: Icon(
+            Icons.lock_outline_sharp,
+            color: Colors.green,
+          ),
+          labelText: 'Password',
+        ),
+      ),
     );
+
+    // return Column(
+    //   children: [
+    //     Text("Password"),
+    //     TextFormField(
+    //       controller: _passwordController,
+    //       // focusNode: _passwordFocusNode,
+    //       obscureText: vis,
+    //       decoration: InputDecoration(
+    //         errorText: validate ? null : errorTextPass,
+    //         suffixIcon: IconButton(
+    //           icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
+    //           onPressed: () {
+    //             setState(() {
+    //               vis = !vis;
+    //             });
+    //           },
+    //         ),
+    //         // helperText: "Password length should have >=8",
+    //         // helperStyle: TextStyle(
+    //         //   fontSize: 14,
+    //         // ),
+    //         focusedBorder: UnderlineInputBorder(
+    //           borderSide: BorderSide(
+    //             color: Colors.black,
+    //             width: 2,
+    //           ),
+    //         ),
+    //       ),
+    //     )
+    //   ],
+    // );
   }
 }

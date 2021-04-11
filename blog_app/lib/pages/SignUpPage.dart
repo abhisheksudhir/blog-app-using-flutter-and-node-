@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:blog_app/pages/WelcomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -56,13 +55,15 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ),
           child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Form(
               key: _globalkey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Sign up with email",
+                    "SIGN UP",
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -114,8 +115,10 @@ class _SignUpPageState extends State<SignUpPage> {
                           "password": _passwordController.text,
                         };
                         print(data);
-                        var responseRegister =
-                            await networkHandler.post("/user/register", data);
+                        // var responseRegister =
+                        //     await networkHandler.post("/user/register", data);
+                        var responseRegister = await networkHandler.post(
+                            "/user/getVerificationMail", data);
                         if (responseRegister == null) {
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -134,60 +137,121 @@ class _SignUpPageState extends State<SignUpPage> {
                           });
                         } else if (responseRegister.statusCode == 200 ||
                             responseRegister.statusCode == 201) {
-                          Map<String, String> data = {
-                            "username": _usernameController.text,
-                            "password": _passwordController.text,
-                          };
-                          var response =
-                              await networkHandler.post("/user/login", data);
-                          if (response == null) {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Some eror occured. Please try later',
+                          setState(() {
+                            circular = false;
+                          });
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        20.0)), //this right here
+                                child: Container(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            "Activate your account by clicking on the link sent to your mail before logging in",
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              InkWell(
+                                                onTap: () {
+                                                  Navigator.of(context)
+                                                      .pushNamedAndRemoveUntil(
+                                                    WelcomePage.routeName,
+                                                    (route) => false,
+                                                  );
+                                                },
+                                                child: Text(
+                                                  "OK",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                duration: Duration(
-                                  seconds: 2,
-                                ),
-                              ),
-                            );
-                            setState(() {
-                              validate = false;
-                              circular = false;
-                            });
-                          } else if (response.statusCode == 200 ||
-                              response.statusCode == 201) {
-                            Map<String, dynamic> output =
-                                json.decode(response.body);
-                            print(output["token"]);
-                            await storage.write(
-                              key: "token",
-                              value: output["token"],
-                            );
-                            await storage.write(
-                              key: "username",
-                              value: data["username"],
-                            );
-                            setState(() {
-                              validate = true;
-                              circular = false;
-                            });
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                                HomePage.routeName, (route) => false);
-                          } else {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Netwok Error',
-                                ),
-                                duration: Duration(
-                                  seconds: 2,
-                                ),
-                              ),
-                            );
-                          }
+                              );
+                            },
+                          );
+                          // Map<String, String> data = {
+                          //   "username": _usernameController.text,
+                          //   "password": _passwordController.text,
+                          // };
+                          // var response =
+                          //     await networkHandler.post("/user/login", data);
+                          // if (response == null) {
+                          //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          //   ScaffoldMessenger.of(context).showSnackBar(
+                          //     SnackBar(
+                          //       content: Text(
+                          //         'Some eror occured. Please try later',
+                          //       ),
+                          //       duration: Duration(
+                          //         seconds: 2,
+                          //       ),
+                          //     ),
+                          //   );
+                          //   setState(() {
+                          //     validate = false;
+                          //     circular = false;
+                          //   });
+                          // } else if (response.statusCode == 200 ||
+                          //     response.statusCode == 201) {
+                          //   Map<String, dynamic> output =
+                          //       json.decode(response.body);
+                          //   print(output["token"]);
+                          //   await storage.write(
+                          //     key: "token",
+                          //     value: output["token"],
+                          //   );
+                          //   await storage.write(
+                          //     key: "username",
+                          //     value: data["username"],
+                          //   );
+                          //   setState(() {
+                          //     validate = true;
+                          //     circular = false;
+                          //   });
+                          //   Navigator.of(context).pushNamedAndRemoveUntil(
+                          //       HomePage.routeName, (route) => false);
+                          // } else {
+                          //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          //   ScaffoldMessenger.of(context).showSnackBar(
+                          //     SnackBar(
+                          //       content: Text(
+                          //         'Netwok Error',
+                          //       ),
+                          //       duration: Duration(
+                          //         seconds: 2,
+                          //       ),
+                          //     ),
+                          //   );
+                          // }
                         }
 
                         setState(() {
@@ -285,104 +349,209 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget usernameTextField() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
-      child: Column(
-        children: [
-          Text("Username"),
-          TextFormField(
-            controller: _usernameController,
-            // focusNode: _usernameFocusNode,
-            textInputAction: TextInputAction.next,
-            // onFieldSubmitted: (_) {
-            //   FocusScope.of(context).requestFocus(_emailFocusNode);
-            // },
-            decoration: InputDecoration(
-              errorText: validate ? null : errorTextUser,
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2,
-                ),
-              ),
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        controller: _usernameController,
+        textInputAction: TextInputAction.next,
+        decoration: InputDecoration(
+          errorText: validate ? null : errorTextUser,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.teal,
             ),
-          )
-        ],
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.orange,
+              width: 2,
+            ),
+          ),
+          prefixIcon: Icon(
+            Icons.person_outline,
+            color: Colors.green,
+          ),
+          labelText: 'UserName',
+        ),
       ),
     );
+
+    // return Padding(
+    //   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
+    //   child: Column(
+    //     children: [
+    //       Text("Username"),
+    //       TextFormField(
+    //         controller: _usernameController,
+    //         // focusNode: _usernameFocusNode,
+    //         textInputAction: TextInputAction.next,
+    //         // onFieldSubmitted: (_) {
+    //         //   FocusScope.of(context).requestFocus(_emailFocusNode);
+    //         // },
+    //         decoration: InputDecoration(
+    //           errorText: validate ? null : errorTextUser,
+    //           focusedBorder: UnderlineInputBorder(
+    //             borderSide: BorderSide(
+    //               color: Colors.black,
+    //               width: 2,
+    //             ),
+    //           ),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    // );
   }
 
   Widget emailTextField() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
-      child: Column(
-        children: [
-          Text("Email"),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            // focusNode: _emailFocusNode,
-            textInputAction: TextInputAction.next,
-            // onFieldSubmitted: (_) {
-            //   FocusScope.of(context).requestFocus(_passwordFocusNode);
-            // },
-            // validator: (value) {
-            //   if (value.isEmpty) return "Email can't be empty";
-            //   if (!value.contains("@")) return "Email is Invalid";
-            //   return null;
-            // },
-            decoration: InputDecoration(
-              errorText: validate ? null : errorTextEmail,
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2,
-                ),
-              ),
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        controller: _emailController,
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.next,
+        decoration: InputDecoration(
+          errorText: validate ? null : errorTextEmail,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.teal,
             ),
-          )
-        ],
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.orange,
+              width: 2,
+            ),
+          ),
+          prefixIcon: Icon(
+            Icons.email_outlined,
+            color: Colors.green,
+          ),
+          labelText: 'Email',
+        ),
       ),
     );
+
+    // return Padding(
+    //   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
+    //   child: Column(
+    //     children: [
+    //       Text("Email"),
+    //       TextFormField(
+    //         controller: _emailController,
+    //         keyboardType: TextInputType.emailAddress,
+    //         // focusNode: _emailFocusNode,
+    //         textInputAction: TextInputAction.next,
+    //         // onFieldSubmitted: (_) {
+    //         //   FocusScope.of(context).requestFocus(_passwordFocusNode);
+    //         // },
+    //         // validator: (value) {
+    //         //   if (value.isEmpty) return "Email can't be empty";
+    //         //   if (!value.contains("@")) return "Email is Invalid";
+    //         //   return null;
+    //         // },
+    //         decoration: InputDecoration(
+    //           errorText: validate ? null : errorTextEmail,
+    //           focusedBorder: UnderlineInputBorder(
+    //             borderSide: BorderSide(
+    //               color: Colors.black,
+    //               width: 2,
+    //             ),
+    //           ),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    // );
   }
 
   Widget passwordTextField() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
-      child: Column(
-        children: [
-          Text("Password"),
-          TextFormField(
-            controller: _passwordController,
-            // focusNode: _passwordFocusNode,
-            validator: (value) {
-              if (value.isEmpty) return "Password can't be empty";
-              if (value.length < 8) return "Password lenght must have >=8";
-              return null;
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        controller: _passwordController,
+        // focusNode: _passwordFocusNode,
+        validator: (value) {
+          if (value.isEmpty) return "Password can't be empty";
+          if (value.length < 8) return "Password length must have >=8";
+          return null;
+        },
+        obscureText: vis,
+        decoration: InputDecoration(
+          suffixIcon: IconButton(
+            icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
+            onPressed: () {
+              setState(() {
+                vis = !vis;
+              });
             },
-            obscureText: vis,
-            decoration: InputDecoration(
-              suffixIcon: IconButton(
-                icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
-                onPressed: () {
-                  setState(() {
-                    vis = !vis;
-                  });
-                },
-              ),
-              helperText: "Password length should have >=8",
-              helperStyle: TextStyle(
-                fontSize: 14,
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2,
-                ),
-              ),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.teal,
             ),
-          )
-        ],
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.orange,
+              width: 2,
+            ),
+          ),
+          prefixIcon: Icon(
+            Icons.lock_outline_sharp,
+            color: Colors.green,
+          ),
+          labelText: 'Password',
+          helperText: "Password length should have >=8",
+          helperStyle: TextStyle(
+            fontSize: 14,
+          ),
+        ),
       ),
     );
+
+    // return Padding(
+    //   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
+    //   child: Column(
+    //     children: [
+    //       Text("Password"),
+    //       TextFormField(
+    //         controller: _passwordController,
+    //         // focusNode: _passwordFocusNode,
+    //         validator: (value) {
+    //           if (value.isEmpty) return "Password can't be empty";
+    //           if (value.length < 8) return "Password length must have >=8";
+    //           return null;
+    //         },
+    //         obscureText: vis,
+    //         decoration: InputDecoration(
+    //           suffixIcon: IconButton(
+    //             icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
+    //             onPressed: () {
+    //               setState(() {
+    //                 vis = !vis;
+    //               });
+    //             },
+    //           ),
+    //           helperText: "Password length should have >=8",
+    //           helperStyle: TextStyle(
+    //             fontSize: 14,
+    //           ),
+    //           focusedBorder: UnderlineInputBorder(
+    //             borderSide: BorderSide(
+    //               color: Colors.black,
+    //               width: 2,
+    //             ),
+    //           ),
+    //         ),
+    //       )
+    //     ],
+    //   ),
+    // );
   }
 }

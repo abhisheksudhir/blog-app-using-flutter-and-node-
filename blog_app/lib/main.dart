@@ -1,4 +1,3 @@
-import 'package:blog_app/screen/BlogScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +14,10 @@ import 'package:blog_app/pages/LoadingPage.dart';
 import 'package:blog_app/profile/EditProfile.dart';
 import 'package:blog_app/blog/addBlog.dart';
 import 'package:blog_app/screen/UserBlogScreen.dart';
+import 'package:blog_app/pages/ForgotPassword.dart';
+import 'package:blog_app/screen/BlogScreen.dart';
+import 'package:blog_app/widgets/Otp.dart';
+import 'package:blog_app/widgets/ResetPassword.dart';
 
 void main() {
   runApp(MyApp());
@@ -69,6 +72,13 @@ class _MyAppState extends State<MyApp> {
         routes: {
           SignUpPage.routeName: (ctx) => SignUpPage(),
           SignInPage.routeName: (ctx) => SignInPage(),
+          ForgotPassword.routeName: (ctx) => ForgotPassword(),
+          Otp.routeName: (ctx) => Otp(
+                ModalRoute.of(ctx).settings.arguments,
+              ),
+          ResetPassword.routeName: (ctx) => ResetPassword(
+                ModalRoute.of(ctx).settings.arguments,
+              ),
           HomePage.routeName: (ctx) => HomePage(),
           WelcomePage.routeName: (ctx) => WelcomePage(),
           ProfileScreen.routeName: (ctx) => ProfileScreen(),

@@ -373,9 +373,9 @@ router.post("/getOtp/:id", async (req, res, next) => {
     }
     const decoded = await jwt.verify(userexist.otp, process.env.SECRET);
 
-    // console.log(decoded);
+    console.log(typeof(decoded.num));
 
-    if (otp.toString() !== decoded.num.toString()) {
+    if (otp !== decoded.num) {
       throw new Error("Incorrect otp");
     }
 
@@ -390,7 +390,6 @@ router.post("/getOtp/:id", async (req, res, next) => {
 
 router.patch(
   "/update/:id/:token",
-  middleware.checkToken,
   async (req, res, next) => {
     try {
       const user = await User.findById({ _id: req.params.id });
@@ -398,6 +397,9 @@ router.patch(
         throw new Error("User does not exist");
       }
       await jwt.verify(user.otp, process.env.SECRET);
+      if (user.otp != req.params.token) {
+        throw new Error("Userotp and token don't match");
+      }
       user.password = req.body.password;
       user.otp = null;
       await user.save();
