@@ -3,8 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:blog_app/NetworkHandler.dart';
+import 'package:jiffy/jiffy.dart';
 
+import 'package:blog_app/NetworkHandler.dart';
 import 'package:blog_app/models/CommentsModel.dart';
 
 class CommentScreen extends StatefulWidget {
@@ -125,8 +126,8 @@ class _CommentScreenState extends State<CommentScreen> {
                                   children: [
                                     Text(
                                       comment.user.username == user
-                                          ? "You"
-                                          : comment.user.username,
+                                          ? "You,"
+                                          : "${comment.user.username},",
                                       style: TextStyle(
                                         fontSize: 15,
                                         color: Colors.grey,
@@ -137,7 +138,8 @@ class _CommentScreenState extends State<CommentScreen> {
                                       width: 5,
                                     ),
                                     Text(
-                                      comment.createdAt.substring(0, 10),
+                                      Jiffy(DateTime.parse(comment.createdAt)).fromNow(),
+                                      // "${comment.createdAt.substring(11, 16)}, ${comment.createdAt.substring(0, 10)}",
                                       style: TextStyle(
                                         fontSize: 15,
                                         color: Colors.grey,
