@@ -5,7 +5,7 @@ const router = express.Router();
 const cloud = require("../cloudinaryconfig");
 const file = require("../fileupload");
 
-const BlogPost = require("../models/blogpost.model");
+const BlogPost = require("../models/blogPost.model");
 const User = require("../models/user.model");
 const Comments = require("../models/comment.model");
 
