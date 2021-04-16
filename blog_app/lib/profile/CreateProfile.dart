@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
@@ -42,6 +43,23 @@ class _CreateProfileState extends State<CreateProfile> {
   TextEditingController _about = TextEditingController();
   PickedFile _imageFile;
   final ImagePicker _picker = ImagePicker();
+
+  void _presentDatePicker() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    ).then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      }
+      setState(() {
+        _dob.text = "${DateFormat('dd/MM/yyyy').format(pickedDate)}";
+        // _dob.text = "${DateFormat.yMd().format(_selectedDate)}";
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -326,32 +344,37 @@ class _CreateProfileState extends State<CreateProfile> {
   }
 
   Widget dobTextField() {
-    return TextFormField(
-      controller: _dob,
-      keyboardType: TextInputType.phone,
-      validator: (value) {
-        if (value.isEmpty) return "DOB can't be empty";
-        return null;
-      },
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.teal,
+    return InkWell(
+      onTap: _presentDatePicker,
+      child: IgnorePointer(
+        child: TextFormField(
+          controller: _dob,
+          keyboardType: TextInputType.phone,
+          validator: (value) {
+            if (value.isEmpty) return "DOB can't be empty";
+            return null;
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.teal,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.orange,
+                width: 2,
+              ),
+            ),
+            prefixIcon: Icon(
+              Icons.date_range,
+              color: Colors.green,
+            ),
+            labelText: "Date of Birth",
+            helperText: "Provide DOB on dd/mm/yyyy",
+            // hintText: "Your Date of Birth",
           ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.orange,
-            width: 2,
-          ),
-        ),
-        prefixIcon: Icon(
-          Icons.date_range,
-          color: Colors.green,
-        ),
-        labelText: "Date of Birth",
-        helperText: "Provide DOB on dd/mm/yyyy",
-        // hintText: "Your Date of Birth",
       ),
     );
   }
