@@ -118,14 +118,22 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              title: Text("All Post"),
+              title: Text("All Blogs"),
               trailing: Icon(Icons.launch),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed(
+                  HomePage.routeName,
+                );
+              },
             ),
             ListTile(
               title: Text("New Blog"),
               trailing: Icon(Icons.add),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed(
+                  AddBlog.routeName,
+                );
+              },
             ),
             ListTile(
               title: Text("Settings"),
@@ -145,11 +153,80 @@ class _HomePageState extends State<HomePage> {
               title: Text("Logout"),
               trailing: Icon(Icons.power_settings_new),
               onTap: () async {
-                await storage.deleteAll();
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  WelcomePage.routeName,
-                  (route) => false,
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      child: Container(
+                        // height: 200,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.min,
+                            // crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  "Are you sure you want to logout?",
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text(
+                                        "Cancel",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 15,
+                                    ),
+                                    InkWell(
+                                      onTap: () async {
+                                        await storage.deleteAll();
+                                        Navigator.of(context)
+                                            .pushNamedAndRemoveUntil(
+                                          WelcomePage.routeName,
+                                          (route) => false,
+                                        );
+                                      },
+                                      child: Text(
+                                        "Yes",
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
+                // await storage.deleteAll();
+                // Navigator.of(context).pushNamedAndRemoveUntil(
+                //   WelcomePage.routeName,
+                //   (route) => false,
+                // );
               },
             ),
           ],

@@ -89,7 +89,7 @@ class _WelcomePageState extends State<WelcomePage>
                 SlideTransition(
                   position: animation1,
                   child: Text(
-                    "Blog App",
+                    "Blogosphere",
                     style: TextStyle(
                       fontSize: 38,
                       fontWeight: FontWeight.w600,
@@ -103,7 +103,7 @@ class _WelcomePageState extends State<WelcomePage>
                 SlideTransition(
                   position: animation2,
                   child: Text(
-                    "Great stories for great people",
+                    "Intriguing blogs for great people",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,

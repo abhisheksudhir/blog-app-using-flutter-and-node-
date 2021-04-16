@@ -32,9 +32,10 @@ class _BlogsState extends State<Blogs> {
     var response = await networkHandler.get(widget.url);
     // Iterable list = response["data"];
     setState(() {
-      blogs = (response["data"] as Iterable)
+      var tp = (response["data"] as Iterable)
           .map((model) => BlogModel.fromJson(model))
           .toList();
+      blogs = tp.reversed.toList();
       circular = false;
     });
     // print(blogs);

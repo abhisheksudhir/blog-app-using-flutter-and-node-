@@ -122,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Center(
                 child: Text(
-                  "Add Proile",
+                  "Add Profile",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,

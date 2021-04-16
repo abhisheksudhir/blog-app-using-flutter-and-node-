@@ -107,58 +107,66 @@ class _CommentScreenState extends State<CommentScreen> {
             Expanded(
               child: circular
                   ? Center(child: CircularProgressIndicator())
-                  : Container(
-                      child: ListView.builder(
-                        controller: _controller,
-                        padding: EdgeInsets.symmetric(
-                          vertical: 2,
-                          horizontal: 16,
-                        ),
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          CommentsModel comment = comments[index];
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                  : comments.length > 0
+                      ? Container(
+                          child: ListView.builder(
+                            controller: _controller,
+                            padding: EdgeInsets.symmetric(
+                              vertical: 2,
+                              horizontal: 16,
+                            ),
+                            itemCount: comments.length,
+                            itemBuilder: (context, index) {
+                              CommentsModel comment = comments[index];
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      comment.user.username == user
-                                          ? "You,"
-                                          : "${comment.user.username},",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.grey,
-                                      ),
-                                      textAlign: TextAlign.left,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          comment.user.username == user
+                                              ? "You,"
+                                              : "${comment.user.username},",
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.grey,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          Jiffy(DateTime.parse(
+                                                  comment.createdAt))
+                                              .fromNow(),
+                                          // "${comment.createdAt.substring(11, 16)}, ${comment.createdAt.substring(0, 10)}",
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.grey,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(
-                                      Jiffy(DateTime.parse(comment.createdAt)).fromNow(),
-                                      // "${comment.createdAt.substring(11, 16)}, ${comment.createdAt.substring(0, 10)}",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.grey,
-                                      ),
+                                    SelectableText(
+                                      comment.content,
                                       textAlign: TextAlign.left,
+                                      style: TextStyle(fontSize: 18),
                                     ),
                                   ],
                                 ),
-                                SelectableText(
-                                  comment.content,
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                              );
+                            },
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            "No comments yet",
+                          ),
+                        ),
             ),
             Container(
               margin: EdgeInsets.only(top: 8),
