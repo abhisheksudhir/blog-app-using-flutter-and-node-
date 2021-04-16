@@ -207,7 +207,7 @@ router.get(
       // }).populate("comments");
       const comments = await Comments.find({
         blog: req.params.id,
-      });
+      }).populate({path:'user', select: 'username _id'});
       res.status(200).json({ data: comments });
     } catch (err) {
       res.status(500).json({ msg: err.message });
@@ -234,6 +234,7 @@ router.post(
         blog: blogexist,
         content: req.body.content,
       });
+      Comments.populate(comment, {path:'user', select: 'username _id'});
       blogexist.comments.push(comment._id);
       await blogexist.save();
       // const { password, blogs, ...user } = userexist.toJSON();

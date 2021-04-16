@@ -37,10 +37,7 @@ class _BlogsState extends State<Blogs> {
           .toList();
       circular = false;
     });
-    print(blogs);
-    // setState(() {
-    //   data = superModel.data;
-    // });
+    // print(blogs);
   }
 
   @override
@@ -54,6 +51,10 @@ class _BlogsState extends State<Blogs> {
                     onTap: () {
                       Navigator.of(context).pushNamed(
                         BlogScreen.routeName,
+                        arguments: {
+                          "blog": blogs[index],
+                          "networkHandler": networkHandler,
+                        },
                       );
                     },
                     child: BlogCard(

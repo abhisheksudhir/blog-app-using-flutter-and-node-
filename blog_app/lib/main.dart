@@ -1,3 +1,4 @@
+import 'package:blog_app/screen/CommentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -90,7 +91,12 @@ class _MyAppState extends State<MyApp> {
           MainProfile.routeName: (ctx) => MainProfile(),
           AddBlog.routeName: (ctx) => AddBlog(),
           UserBlogScreen.routeName: (ctx) => UserBlogScreen(),
-          BlogScreen.routeName: (ctx) => BlogScreen(),
+          BlogScreen.routeName: (ctx) => BlogScreen(
+            ModalRoute.of(ctx).settings.arguments,
+          ),
+          CommentScreen.routeName: (ctx) => CommentScreen(
+            ModalRoute.of(ctx).settings.arguments,
+          )
         },
       ),
     );

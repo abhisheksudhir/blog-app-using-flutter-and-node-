@@ -10,13 +10,14 @@ class NetworkHandler {
   // String baseurl =
   //     "http://192.168.0.104:5000"; // instead localhost add your ip address here
   String baseurl =
-      "https://f8f56f8944da.ngrok.io"; // add your ngrok forwarding to connect to real device
+      "https://b4624543c89e.ngrok.io"; // add your ngrok forwarding to connect to real device
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
 
   Future get(String url) async {
     String token = await storage.read(key: "token");
     url = formater(url);
+    print(url);
     try {
       var response = await http.get(
         url,

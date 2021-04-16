@@ -347,7 +347,7 @@ router.post("/forgotPassword", async (req, res, next) => {
       <h2>OTP for changing password</h2>
       <br />
       <p>Below is the otp for changing your account password. It is valid for only 5 minutes</p>
-      <h5>${num}</h5>
+      <h1>${num}</h1>
       `,
     };
     // sendEmail(mailObj).then((res) => {

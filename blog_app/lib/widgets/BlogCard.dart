@@ -1,10 +1,7 @@
-import 'dart:io';
-
-import 'package:blog_app/models/BlogModel.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 import 'package:blog_app/NetworkHandler.dart';
+import 'package:blog_app/models/BlogModel.dart';
 
 class BlogCard extends StatelessWidget {
   final NetworkHandler networkHandler;
